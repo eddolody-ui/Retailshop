@@ -1,14 +1,47 @@
-import App from "../../../App";
+import { Calendar, Home, Inbox, Search, Settings } from "lucide-react"
 
-const HomePage = () => {
-  return (
-    <div>
-      <h3 className="felx flex items-baseline text-center text-2xl font-bold sm:text-red-500 xl:text-green-500">
-        Home Page
-      </h3>
-      <App />
-    </div>
-  );
-};
+import {
+  Sidebar,
+  SidebarContent,
+  SidebarGroup,
+  SidebarGroupContent,
+  SidebarGroupLabel,
+  SidebarMenu,
+  SidebarMenuButton,
+  SidebarMenuItem,
+} from "@/components/ui/sidebar"
+import { Sheet } from "@/components/ui/sheet"
+import { SheetDemo } from "@/components/SheetDemo"
 
-export default HomePage;
+// Menu items.
+const items = [
+  {
+    title: "Home",
+    url: "#",
+    icon: Home,
+  },
+  {
+    title: "Inbox",
+    url: "#",
+    icon: Inbox,
+  },
+  {
+    title: "Calendar",
+    url: "#",
+    icon: Calendar,
+  },
+  {
+    title: "Search",
+    url: "#",
+    icon: Search,
+  },
+  {
+    title: "Settings",
+    url: "#",
+    icon: Settings,
+  },
+]
+
+export function HomePage() {
+  return <SheetDemo/>
+}
