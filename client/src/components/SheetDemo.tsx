@@ -15,9 +15,11 @@ import {
 export function SheetDemo() {
   return (
     <Sheet>
+      <div className="absolute right-1 ">
       <SheetTrigger asChild>
         <Button variant="outline">Open</Button>
       </SheetTrigger>
+      </div>
       <SheetContent side="left">
         <SheetHeader>
           <SheetTitle>Edit profile</SheetTitle>

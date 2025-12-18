@@ -1,47 +1,26 @@
-import { Calendar, Home, Inbox, Search, Settings } from "lucide-react"
-
-import {
-  Sidebar,
-  SidebarContent,
-  SidebarGroup,
-  SidebarGroupContent,
-  SidebarGroupLabel,
-  SidebarMenu,
-  SidebarMenuButton,
-  SidebarMenuItem,
-} from "@/components/ui/sidebar"
-import { Sheet } from "@/components/ui/sheet"
+import { SidebarProvider, SidebarInset, SidebarTrigger } from "@/components/ui/sidebar"
+import { AppSidebar } from "@/components/AppSidebar"
 import { SheetDemo } from "@/components/SheetDemo"
-
-// Menu items.
-const items = [
-  {
-    title: "Home",
-    url: "#",
-    icon: Home,
-  },
-  {
-    title: "Inbox",
-    url: "#",
-    icon: Inbox,
-  },
-  {
-    title: "Calendar",
-    url: "#",
-    icon: Calendar,
-  },
-  {
-    title: "Search",
-    url: "#",
-    icon: Search,
-  },
-  {
-    title: "Settings",
-    url: "#",
-    icon: Settings,
-  },
-]
+import { TopNavbar } from "@/components/TopNavbar"
 
 export function HomePage() {
-  return <SheetDemo/>
+  return (
+    <SidebarProvider>
+  <div className="flex min-h-screen w-full">
+    {/* Sidebar */}
+    <AppSidebar />
+
+    {/* Main content */}
+    <SidebarInset className="flex flex-col w-full">
+      {/* Top Navbar */}
+      <TopNavbar />
+
+      {/* Page content */}
+      <main className="flex-1 p-4">
+      </main>
+    </SidebarInset>
+  </div>
+</SidebarProvider>
+
+  )
 }
