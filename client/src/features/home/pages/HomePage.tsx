@@ -25,5 +25,5 @@ export function HomePage() {
   </div>
 </SidebarProvider>
 
-  )
+)
 }

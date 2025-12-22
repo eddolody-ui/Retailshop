@@ -48,7 +48,7 @@ const items: MenuItem[] = [
   { title: "Order",
     icon: FiShoppingCart,
     children: [
-      { title: "Order", url:"/OrderPage", icon: Users },
+      { title: "Order", url:"/Order", icon: Users },
       { title: "Security", url: "/security", icon: Lock },
     ],
   },
@@ -56,8 +56,8 @@ const items: MenuItem[] = [
  { title: "Shipper",
    icon: Settings,
    children: [
-     { title: "Profile", url: "/profile", icon: Users },
-     { title: "Security", url: "/security", icon: Lock },
+     { title: "Shipper", url: "/Shipper", icon: Users },
+     { title: "CreateShipper", url: "/Shipper/CreateShipper", icon: Lock },
    ],
  },
 ]

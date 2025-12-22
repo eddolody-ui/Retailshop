@@ -1,16 +1,26 @@
-import { StrictMode } from "react";
-import { createRoot } from "react-dom/client";
-import {HomePage} from "./features/home/pages/HomePage.tsx";
-import "./index.css";
-import { SidebarProvider } from "./components/ui/sidebar.tsx";
-import { BrowserRouter } from "react-router-dom"
+  import { StrictMode } from "react";
+  import { createRoot } from "react-dom/client";
+  import {HomePage} from "./features/home/pages/HomePage.tsx";
+  import "./index.css";
+  import { SidebarProvider } from "./components/ui/sidebar.tsx";
+  import { createBrowserRouter, RouterProvider } from "react-router-dom"
+  import { Order } from "./features/home/pages/Order.tsx";
+  import { CreateOrderForm } from "./features/home/pages/CreateOrder.tsx";
+  import { Shipper } from "./features/home/pages/Shipper";
+  import { CreateShipper } from "./features/home/pages/CreateShipper";
 
-createRoot(document.getElementById("root")!).render(
-  <StrictMode>
-    <BrowserRouter>
-      <SidebarProvider>
-          <HomePage />
-      </SidebarProvider>
-    </BrowserRouter>
-  </StrictMode>,
-);
+  const router =createBrowserRouter ([
+    {path: '/',element:<HomePage/>},
+    {path:'/Order',element:<Order/>},
+    {path:'/Order/CreateOrder',element:<CreateOrderForm/>},
+    {path:'/Shipper',element:<Shipper/>},
+    {path:'/Shipper/CreateShipper',element:<CreateShipper/>},
+  ])
+  
+  createRoot(document.getElementById("root")!).render(
+    <StrictMode>
+        <SidebarProvider>
+            <RouterProvider router={router}/>
+        </SidebarProvider>
+    </StrictMode>,
+  );
