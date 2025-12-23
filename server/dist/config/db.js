@@ -12,7 +12,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.saveOrder = exports.Order = exports.connectDB = void 0;
+exports.saveShipper = exports.Shipper = exports.saveOrder = exports.Order = exports.connectDB = void 0;
 const mongoose_1 = __importDefault(require("mongoose"));
 /* =======================
    MongoDB Connection
@@ -97,3 +97,25 @@ const saveOrder = (orderData) => __awaiter(void 0, void 0, void 0, function* () 
     }
 });
 exports.saveOrder = saveOrder;
+const ShipperSchema = new mongoose_1.default.Schema({
+    ShipperId: { type: String, required: true },
+    ShipperName: { type: String, required: true },
+    ShipperContact: { type: Number, required: true },
+    ShipperAddress: { type: String, required: true },
+    PickUpAddress: { type: String, required: true },
+    BillingType: { type: String, required: true },
+    Note: { type: String },
+}, { timestamps: true });
+const Shipper = mongoose_1.default.models.Shipper || mongoose_1.default.model("Shipper", ShipperSchema);
+exports.Shipper = Shipper;
+const saveShipper = (shipperData) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const shipper = new Shipper(shipperData);
+        return yield shipper.save();
+    }
+    catch (error) {
+        console.error("❌ Shipper save error:", error);
+        throw error;
+    }
+});
+exports.saveShipper = saveShipper;

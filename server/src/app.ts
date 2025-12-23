@@ -8,6 +8,7 @@ import { ENV_VARS } from "./config/envVars";
 // import { errorHandler } from "./middlewares/errorHandler";
 // import routes from "./routes/v1";
 import orderRoutes from "./order.rout";
+import shipperRoutes from "./shipper.rout";
 
 export const app = express();
 console.log(ENV_VARS.CLIENT_URL);
@@ -40,5 +41,6 @@ app
 
 // app.use(routes);
 app.use("/api/orders", orderRoutes);
+app.use("/api/shippers", shipperRoutes);
 
 // app.use(errorHandler);

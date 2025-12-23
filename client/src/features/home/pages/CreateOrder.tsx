@@ -60,7 +60,7 @@ export function CreateOrderForm() {
     CustomerContact: "",
     CustomerAddress: "",
     Amount: 0,
-    Type: "COD",
+    Type: "",
     Note: ""
   });
 

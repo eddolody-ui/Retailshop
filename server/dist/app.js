@@ -47,6 +47,7 @@ const envVars_1 = require("./config/envVars");
 // import { errorHandler } from "./middlewares/errorHandler";
 // import routes from "./routes/v1";
 const order_rout_1 = __importDefault(require("./order.rout"));
+const shipper_rout_1 = __importDefault(require("./shipper.rout"));
 exports.app = (0, express_1.default)();
 console.log(envVars_1.ENV_VARS.CLIENT_URL);
 const whiteList = [envVars_1.ENV_VARS.CLIENT_URL];
@@ -74,4 +75,5 @@ exports.app
     .use((0, compression_1.default)());
 // app.use(routes);
 exports.app.use("/api/orders", order_rout_1.default);
+exports.app.use("/api/shippers", shipper_rout_1.default);
 // app.use(errorHandler);

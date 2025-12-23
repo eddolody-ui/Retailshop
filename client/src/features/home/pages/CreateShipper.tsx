@@ -3,16 +3,47 @@ import { Button } from "@/components/ui/button"
 import { AppSidebar, TopNavbar } from "@/components/contentarea"
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar"
 import { useNavigate } from "react-router-dom";
+import { useState } from "react";
+import { createShipper } from "@/api/serviceApi";
 
 export function CreateShipper() {
   const navigate = useNavigate(); // ⬅️ initialize navigate
+  
+  // Loading state to disable form during API call
+  const [loading, setLoading] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    // you can add your form logic here (API call, validation, etc.)
-    navigate("/Shipper"); // ⬅️ redirect to shipper page
-  };
+const handleSubmit = async (e: React.FormEvent) => {
+  e.preventDefault();
+  setLoading(true);
+  try {
+    await createShipper(formData);
+    navigate("/Shipper"); // ⬅️ redirect to order page
+  } catch (error) {
+    console.error("Error creating order:", error);
+    // You can add error handling here, like showing a toast
+  } finally {
+    setLoading(false);
+  }
+};
 
+  // Form data state - holds all input values
+  const [formData, setFormData] = useState({
+    ShipperId: "",
+    ShipperName : "",
+    ShipperContact: "",
+    ShipperAddress: "",
+    PickUpAddress: "",
+    BillingType: "",
+    Note: ""
+  });
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+    const { name, value } = e.target;
+    setFormData((prevData) => ({
+      ...prevData,
+      [name]: value,
+    }));
+  } 
+  
   return (
     <SidebarProvider>
       <AppSidebar />
@@ -31,6 +62,9 @@ export function CreateShipper() {
                       Shipper ID                    
                     </label>
                     <Input
+                      value={formData.ShipperId}
+                      onChange={handleChange}
+                      name="ShipperId"
                       placeholder="Enter Shipper ID"
                       className="rounded-lg focus:ring-2 focus:ring-blue-500"
                     />
@@ -40,6 +74,9 @@ export function CreateShipper() {
                       Shipper Name
                     </label>
                     <Input
+                      value={formData.ShipperName}
+                      onChange={handleChange}
+                      name="ShipperName"
                       placeholder="Enter Shipper name"
                       className="rounded-lg focus:ring-2 focus:ring-blue-500"
                     />
@@ -49,6 +86,9 @@ export function CreateShipper() {
                       Shipper Contact
                     </label>
                     <Input
+                      value={formData.ShipperContact}
+                      onChange={handleChange}
+                      name="ShipperContact"
                       placeholder="Enter Shipper number"
                       className="rounded-lg focus:ring-2 focus:ring-blue-500"
                     />
@@ -58,15 +98,9 @@ export function CreateShipper() {
                       Shipper Address
                     </label>
                     <Input
-                      placeholder="Enter full address"
-                      className="rounded-lg focus:ring-2 focus:ring-blue-500"
-                    />
-                  </div>
-                  <div className="md:col-span-2">
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Shipper Address
-                    </label>
-                    <Input
+                      value={formData.ShipperAddress}
+                      onChange={handleChange}
+                      name="ShipperAddress"
                       placeholder="Enter full address"
                       className="rounded-lg focus:ring-2 focus:ring-blue-500"
                     />
@@ -76,6 +110,9 @@ export function CreateShipper() {
                       PickUp Address
                     </label>
                     <Input
+                      value={formData.PickUpAddress}
+                      onChange={handleChange}
+                      name="PickUpAddress"
                       placeholder="Enter PickUp Address"
                       className="rounded-lg focus:ring-2 focus:ring-blue-500"
                     />
@@ -85,7 +122,7 @@ export function CreateShipper() {
                       Billing Type
                     </label>
                     <div className="flex gap-2" >
-                      <select className="rounded-lg focus:ring-2 focus:ring-blue-500 border border-gray-300 px-3 py-2 bg-white text-sm">
+                      <select value={formData.BillingType} onChange={handleChange} name="BillingType" className="rounded-lg focus:ring-2 focus:ring-blue-500 border border-gray-300 px-3 py-2 bg-white text-sm">
                         <option value="COD">KBZ</option>
                         <option value="Prepaid">Banking</option>
                         <option value="Return">PrePaid</option>
@@ -97,13 +134,16 @@ export function CreateShipper() {
                       Note
                     </label>
                     <Input
+                      value={formData.Note}
+                      onChange={handleChange}
+                      name="Note"
                       placeholder="Any delivery notes"
                       className="rounded-lg focus:ring-2 focus:ring-blue-500"/>
                   </div>
                 </div>
               </div>
-                <Button className="bg-gray-600 hover:bg-gray-500 text-white px-6 py-2 rounded-lg ml-213">
-                Create
+                <Button  type="submit" disabled={loading} className="px-6 py-2 rounded-lg ml-205 bg-blue-600 hover:bg-blue-500 text-white">
+                  {loading ? "Creating..." : "Create Shipper"}
                 </Button>
             </form>
           </div>

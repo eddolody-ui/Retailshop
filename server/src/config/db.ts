@@ -90,3 +90,29 @@ const saveOrder = async (orderData: any) => {
 };
 
 export { Order, saveOrder };
+
+
+const ShipperSchema = new mongoose.Schema({
+    ShipperId: { type: String, required: true },
+    ShipperName: { type: String, required: true },
+    ShipperContact: { type: Number, required: true },
+    ShipperAddress: { type: String, required: true },
+    PickUpAddress: { type: String, required: true },
+    BillingType: { type: String, required: true },
+    Note: { type: String },
+}, { timestamps: true });
+
+const Shipper =
+  mongoose.models.Shipper || mongoose.model("Shipper", ShipperSchema);
+
+const saveShipper = async (shipperData: any) => {
+  try {
+    const shipper = new Shipper(shipperData); 
+    return await shipper.save();
+  } catch (error) {
+    console.error("❌ Shipper save error:", error);
+    throw error;
+  } 
+};
+
+export { Shipper, saveShipper };
