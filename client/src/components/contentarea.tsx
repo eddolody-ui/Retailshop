@@ -311,54 +311,50 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table"
-const data: Payment[] = [
-  { id: "m5gr84i9", amount: 316, status: "success", email: "ken99@example.com", date : "2025.11.2",},
-  {id: "3u1reuv4",amount: 242,status: "success",email: "Abe45@example.com",date: "2025.11.2",},
-  {id: "derv1ws0",amount: 837,status: "processing",email: "Monserrat44@example.com",date: "2025.11.2"},
-  {id: "5kma53ae",amount: 874,status: "success",email: "Silas22@example.com",date: "2025.11.2"},
-  {id: "bhqecj4p",amount: 721,status: "failed",email: "carmella@example.com",date:"2025.11.2"},
-];
-export type Payment = {
-  id: string
-  amount: number
-  status: "pending" | "processing" | "success" | "failed"
-  email: string
-  date: string
-}
-export const columns: ColumnDef<Payment>[] = [
+import { getOrders, type OrderData } from "@/api/serviceApi"
+
+export type Order = OrderData & { _id: string; createdAt: string; updatedAt: string };
+export const columns: ColumnDef<Order>[] = [
   {
-  accessorKey: "id",
-  header: ()=> <div className="ml-9">Shipper ID</div>,
-  cell: ({ row }) => (
-    <div className="capitalize ml-10">{row.getValue("id")}</div>
-  ),
-},
-{
-  accessorKey: "IdName",
-  header: ()=> <div>Shipper Name</div>,
-  cell: ({ row }) => (
-    <div className="capitalize ml-3">{row.getValue("status")}</div>
-  ),
-},
-  {
-  accessorKey: "date",
-  header: ()=> <div className="ml-3">Date</div>,
-  cell: ({ row }) => (
-    <div className="capitalize">{row.getValue("date")}</div>
-  ),
-  },
-  {
-    accessorKey: "status",
-    header: ()=> <div className="ml-1">Status</div>,
+    accessorKey: "TrackingId",
+    header: () => <div className="ml-9">Tracking ID</div>,
     cell: ({ row }) => (
-      <div className="capitalize">{row.getValue("status")}</div>
+      <div className="capitalize ml-10">{row.getValue("TrackingId")}</div>
     ),
   },
   {
-    accessorKey: "amount",
+    accessorKey: "CustomerName",
+    header: () => <div>Customer Name</div>,
+    cell: ({ row }) => (
+      <div className="capitalize ml-3">{row.getValue("CustomerName")}</div>
+    ),
+  },
+  {
+    accessorKey: "CustomerContact",
+    header: () => <div>Contact</div>,
+    cell: ({ row }) => (
+      <div className="capitalize">{row.getValue("CustomerContact")}</div>
+    ),
+  },
+  {
+    accessorKey: "CustomerAddress",
+    header: () => <div>Address</div>,
+    cell: ({ row }) => (
+      <div className="capitalize">{row.getValue("CustomerAddress")}</div>
+    ),
+  },
+  {
+    accessorKey: "Type",
+    header: () => <div>Type</div>,
+    cell: ({ row }) => (
+      <div className="capitalize">{row.getValue("Type")}</div>
+    ),
+  },
+  {
+    accessorKey: "Amount",
     header: () => <div className="text-right mr-10">Amount</div>,
     cell: ({ row }) => {
-      const amount = parseFloat(row.getValue("amount"))
+      const amount = parseFloat(row.getValue("Amount"))
 
       // Format the amount as a dollar amount
       const formatted = new Intl.NumberFormat("en-US", {
@@ -368,9 +364,34 @@ export const columns: ColumnDef<Payment>[] = [
       return <div className="text-right font-medium mr-10">{formatted}</div>
     },
   },
+  {
+    accessorKey: "createdAt",
+    header: () => <div className="ml-3">Date</div>,
+    cell: ({ row }) => {
+      const date = new Date(row.getValue("createdAt")).toLocaleDateString();
+      return <div className="capitalize">{date}</div>
+    },
+  },
 ]
 
+/**
+ * DataTableDemo Component
+ * 
+ * Order data ကို sortable၊ filterable table တွင် search functionality ဖြင့် display လုပ်သည်။
+ * Backend API မှ order data ကို fetch လုပ်ပြီး TanStack Table ကို အသုံးပြု၍ render လုပ်သည်။
+ * 
+ * Relationships:
+ * - Order list ကို display လုပ်ရန် Order page component မှ အသုံးပြုသည်
+ * - Backend မှ data fetch လုပ်ရန် getOrders() API function ကို call လုပ်သည်
+ * - MongoDB fields များဖြင့် OrderData ကို extend လုပ်သော Order type ကို အသုံးပြုသည်
+ * - GET /api/orders endpoint မှ data ကို render လုပ်သည်
+ * - TrackingId ဖြင့် search functionality ကို provide လုပ်သည်
+ * - Data fetch အတွင်း loading state ကို show လုပ်သည်
+ * - Data array ဗလာဖြစ်သောအခါ "No orders found" ကို display လုပ်သည်
+ */
 export function DataTableDemo() {
+  const [data, setData] = React.useState<Order[]>([]);
+  const [loading, setLoading] = React.useState(true);
   const [sorting, setSorting] = React.useState<SortingState>([])
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
     []
@@ -378,6 +399,20 @@ export function DataTableDemo() {
   const [columnVisibility, setColumnVisibility] =
     React.useState<VisibilityState>({})
   const [rowSelection, setRowSelection] = React.useState({})
+
+  React.useEffect(() => {
+    const fetchOrders = async () => {
+      try {
+        const orders = await getOrders();
+        setData(orders as Order[]);
+      } catch (error) {
+        console.error("Failed to fetch orders:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchOrders();
+  }, []);
 
   const table = useReactTable({
     data,
@@ -398,15 +433,19 @@ export function DataTableDemo() {
     },
   })
 
+  if (loading) {
+    return <div className="p-4">Loading orders...</div>;
+  }
+
   return (
     //Search-Bar//
     <div className="w-full">
       <div className="flex items-center py-4">
         <Input
-          placeholder="Search by Id..."
-          value={(table.getColumn("id")?.getFilterValue() as string) ?? ""}
+          placeholder="Search by Tracking ID..."
+          value={(table.getColumn("TrackingId")?.getFilterValue() as string) ?? ""}
           onChange={(event) =>
-            table.getColumn("id")?.setFilterValue(event.target.value)
+            table.getColumn("TrackingId")?.setFilterValue(event.target.value)
           }
           className="max-w-sm"
         />
@@ -454,7 +493,7 @@ export function DataTableDemo() {
                   colSpan={columns.length}
                   className="h-24 text-center"
                 >
-                  No results.
+                  No orders found.
                 </TableCell>
               </TableRow>
             )}

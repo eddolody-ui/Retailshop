@@ -3,14 +3,86 @@ import { Button } from "@/components/ui/button"
 import { AppSidebar, TopNavbar } from "@/components/contentarea"
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar"
 import { useNavigate } from "react-router-dom";
+import { useState } from "react";
+import { createOrder } from "@/api/serviceApi";
 
+/**
+ * CreateOrderForm Component
+ * 
+ * ဤအရာသည် အသစ်စက်စက် order များဖန်တီးရန် အဓိက component ဖြစ်သည်။ ၎င်းသည် form state ကို စီမံခန့်ခွဲပြီး၊
+ * user input ကို handle လုပ်ပြီး order data ကို backend API သို့ submit လုပ်သည်။
+ * 
+ * Relationships:
+ * - handleSubmit ကို အသုံးပြု၍ form submission ကို process လုပ်ပြီး createOrder API ကို call လုပ်သည်
+ * - handleChange ကို အသုံးပြု၍ user input တွင် formData state ကို update လုပ်သည်
+ * - Submit လုပ်ပြီးနောက် Order page သို့ navigate လုပ်သည်
+ * - UI layout တစ်သမတ်ဖြစ်စေရန် AppSidebar နှင့် TopNavbar များနှင့် integrate လုပ်သည်
+ */
 export function CreateOrderForm() {
-  const navigate = useNavigate(); // ⬅️ initialize navigate
-  const handleSubmit = (e: React.FormEvent) => {
+  // Navigation hook for redirecting after form submission
+  const navigate = useNavigate();
+  
+  // Loading state to disable form during API call
+  const [loading, setLoading] = useState(false);
+
+  /**
+   * handleSubmit Function
+   * 
+   * Form submission event ကို handle လုပ်သည်။ Default form behavior ကို prevent လုပ်ပြီး၊
+   * order data ကို createOrder API မှတစ်ဆင့် backend သို့ send လုပ်ပြီး၊
+   * success ဖြစ်ပါက Order page သို့ navigate လုပ်သည်။
+   * 
+   * Relationships:
+   * - Form submit လုပ်သောအခါ (onSubmit event) တွင် call လုပ်သည်
+   * - Input အဖြစ် handleChange မှ manage လုပ်သော formData state ကို အသုံးပြုသည်
+   * - Data ကို persist လုပ်ရန် createOrder API function ကို call လုပ်သည်
+   * - Async operation အတွင်း loading state ကို update လုပ်သည်
+   * - Success ဖြစ်ပါက redirect လုပ်ရန် navigate hook ကို အသုံးပြုသည်
+   */
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // you can add your form logic here (API call, validation, etc.)
-    navigate("/Order"); // ⬅️ redirect to shipper page
+    setLoading(true);
+    try {
+      await createOrder(formData);
+      navigate("/Order"); // ⬅️ redirect to order page
+    } catch (error) {
+      console.error("Error creating order:", error);
+      // You can add error handling here, like showing a toast
+    } finally {
+      setLoading(false);
+    }
   };
+
+  // Form data state - holds all input values
+  const [formData, setFormData] = useState({
+    TrackingId: "",
+    CustomerName: "",
+    CustomerContact: "",
+    CustomerAddress: "",
+    Amount: 0,
+    Type: "COD",
+    Note: ""
+  });
+
+  /**
+   * handleChange Function
+   * 
+   * User က input တွင် type လုပ်သောအခါ သို့မဟုတ် option များကို select လုပ်သောအခါ formData state ကို update လုပ်သည်။
+   * Amount field အတွက် text input နှင့် number conversion ကို handle လုပ်သည်။
+   * 
+   * Relationships:
+   * - လုပ်ငန်းသုံး input အားလုံးတွင် onChange event တွင် call လုပ်သည်
+   * - handleSubmit မှ အသုံးပြုသော formData state ကို update လုပ်သည်
+   * - Proper data handling အတွက် Amount ကို number type သို့ convert လုပ်သည်
+   * - Previous state ကို spread လုပ်ခြင်းဖြင့် immutability ကို maintain လုပ်သည်
+   */
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+    const { name, value } = e.target;
+    setFormData((prevData) => ({  
+      ...prevData,
+      [name]: name === "Amount" ? Number(value) : value, // Convert Amount to number
+    }));
+  } 
   return (
     <SidebarProvider>
       <AppSidebar />
@@ -29,6 +101,9 @@ export function CreateOrderForm() {
                       Tracking ID                    
                     </label>
                     <Input
+                      onChange={handleChange}
+                      name="TrackingId"
+                      value={formData.TrackingId}
                       placeholder="Enter Tracking ID"
                       className="rounded-lg focus:ring-2 focus:ring-blue-500"
                     />
@@ -38,24 +113,34 @@ export function CreateOrderForm() {
                       Customer Name
                     </label>
                     <Input
+                      onChange={handleChange}
+                      value={formData.CustomerName}
+                      name="CustomerName"
                       placeholder="Enter Customer name"
                       className="rounded-lg focus:ring-2 focus:ring-blue-500"
                     />
                   </div>
+
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
                       Customer Contact
                     </label>
                     <Input
+                      onChange={handleChange}
+                      value={formData.CustomerContact}
+                      name="CustomerContact"
                       placeholder="Enter Customer number"
                       className="rounded-lg focus:ring-2 focus:ring-blue-500"
                     />
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Customer Address
+                        Customer Address
                     </label>
                     <Input
+                      onChange={handleChange}
+                      value={formData.CustomerAddress}
+                      name="CustomerAddress"
                       placeholder="Enter full address"
                       className="rounded-lg focus:ring-2 focus:ring-blue-500"
                     />
@@ -65,6 +150,9 @@ export function CreateOrderForm() {
                       Amount
                     </label>
                     <Input
+                      onChange={handleChange}
+                      value={formData.Amount}
+                      name="Amount"
                       placeholder="Enter Amount"
                       className="rounded-lg focus:ring-2 focus:ring-blue-500"
                     />
@@ -74,7 +162,7 @@ export function CreateOrderForm() {
                       Type
                     </label>
                     <div className="flex gap-2" >
-                      <select className="rounded-lg focus:ring-2 focus:ring-blue-500 border border-gray-300 px-3 py-2 bg-white text-sm">
+                      <select onChange={handleChange} value={formData.Type} className="rounded-lg focus:ring-2 focus:ring-blue-500 border border-gray-300 px-3 py-2 bg-white text-sm" name="Type">
                         <option value="COD">COD</option>
                         <option value="Prepaid">Prepaid</option>
                         <option value="Return">Return</option>
@@ -86,8 +174,11 @@ export function CreateOrderForm() {
                       Note
                     </label>
                     <Input
+                      onChange={handleChange}
+                      value={formData.Note}
                       placeholder="Any delivery notes"
                       className="rounded-lg focus:ring-2 focus:ring-blue-500"
+                      name="Note"
                     />
                   </div>
                 </div>
@@ -107,11 +198,11 @@ export function CreateOrderForm() {
                     file:text-sm file:font-medium file:bg-blue-50 file:text-blue-700 
                      hover:file:bg-blue-100"
                     />
-                    <Button className="bg-gray-600 hover:bg-gray-500 text-white px-6 py-2 rounded-lg ml-140">
-                    Create
-                    </Button>
+                    <Button type="submit" disabled={loading} className="px-6 py-2 rounded-lg ml-133 bg-blue-600 hover:bg-blue-500 text-white">
+                      {loading ? "Creating..." : "Create Order"}
+                    </Button>                
+                  </div>
                 </div>
-            </div>
             </form>
           </div>
       </SidebarInset>

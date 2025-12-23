@@ -7,6 +7,7 @@ import morgan from "morgan";
 import { ENV_VARS } from "./config/envVars";
 // import { errorHandler } from "./middlewares/errorHandler";
 // import routes from "./routes/v1";
+import orderRoutes from "./order.rout";
 
 export const app = express();
 console.log(ENV_VARS.CLIENT_URL);
@@ -38,5 +39,6 @@ app
   .use(compression());
 
 // app.use(routes);
+app.use("/api/orders", orderRoutes);
 
 // app.use(errorHandler);
