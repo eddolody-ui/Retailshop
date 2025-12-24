@@ -42,6 +42,7 @@ const OrderSchema = new mongoose.Schema(
     Amount: { type: Number, required: true },
     Type: { type: String, required: true },
     Note: { type: String },
+    shipperId: { type: mongoose.Schema.Types.ObjectId, ref: 'Shipper' },
   },
   { timestamps: true }
 );

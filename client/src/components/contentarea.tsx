@@ -22,7 +22,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip"
-import { Link, useLocation } from "react-router-dom"
+import { Link, useLocation, useNavigate } from "react-router-dom"
 //Top-Directory-Link import//
 import {
   Breadcrumb,
@@ -311,9 +311,62 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table"
-import { getOrders, type OrderData } from "@/api/serviceApi"
+import { getOrders, getShippers, type OrderData, type ShipperData } from "@/api/serviceApi"
 
 export type Order = OrderData & { _id: string; createdAt: string; updatedAt: string };
+export type Shipper = ShipperData & { _id: string; createdAt: string; updatedAt: string };
+export const shipperColumns: ColumnDef<Shipper>[] = [
+  {
+    accessorKey: "ShipperId",
+    header: () => <div className="ml-9">Shipper ID</div>,
+    cell: ({ row }) => (
+      <div className="capitalize ml-10">{row.getValue("ShipperId")}</div>
+    ),
+  },
+  {
+    accessorKey: "ShipperName",
+    header: () => <div>Shipper Name</div>,
+    cell: ({ row }) => (
+      <div className="capitalize ml-3">{row.getValue("ShipperName")}</div>
+    ),
+  },
+  {
+    accessorKey: "ShipperContact",
+    header: () => <div>Contact</div>,
+    cell: ({ row }) => (
+      <div className="capitalize">{row.getValue("ShipperContact")}</div>
+    ),
+  },
+  {
+    accessorKey: "ShipperAddress",
+    header: () => <div>Address</div>,
+    cell: ({ row }) => (
+      <div className="capitalize">{row.getValue("ShipperAddress")}</div>
+    ),
+  },
+  {
+    accessorKey: "PickUpAddress",
+    header: () => <div>Pick Up Address</div>,
+    cell: ({ row }) => (
+      <div className="capitalize">{row.getValue("PickUpAddress")}</div>
+    ),
+  },
+  {
+    accessorKey: "BillingType",
+    header: () => <div>Billing Type</div>,
+    cell: ({ row }) => (
+      <div className="capitalize">{row.getValue("BillingType")}</div>
+    ),
+  },
+  {
+    accessorKey: "createdAt",
+    header: () => <div className="ml-3">Date Created</div>,
+    cell: ({ row }) => {
+      const date = new Date(row.getValue("createdAt")).toLocaleDateString();
+      return <div className="capitalize">{date}</div>
+    },
+  },
+]
 export const columns: ColumnDef<Order>[] = [
   {
     accessorKey: "TrackingId",
@@ -349,6 +402,17 @@ export const columns: ColumnDef<Order>[] = [
     cell: ({ row }) => (
       <div className="capitalize">{row.getValue("Type")}</div>
     ),
+  },
+  {
+    accessorKey: "shipperId",
+    header: () => <div>Shipper</div>,
+    cell: ({ row }) => {
+      const shipperId = row.getValue("shipperId") as any;
+      if (shipperId && typeof shipperId === 'object' && shipperId.ShipperName) {
+        return <div className="capitalize">{shipperId.ShipperName}</div>
+      }
+      return <div className="text-gray-500">Not assigned</div>
+    },
   },
   {
     accessorKey: "Amount",
@@ -390,6 +454,7 @@ export const columns: ColumnDef<Order>[] = [
  * - Data array ဗလာဖြစ်သောအခါ "No orders found" ကို display လုပ်သည်
  */
 export function DataTableDemo() {
+  const navigate = useNavigate()
   const [data, setData] = React.useState<Order[]>([]);
   const [loading, setLoading] = React.useState(true);
   const [sorting, setSorting] = React.useState<SortingState>([])
@@ -476,6 +541,11 @@ export function DataTableDemo() {
                 <TableRow
                   key={row.id}
                   data-state={row.getIsSelected() && "selected"}
+                  className="cursor-pointer hover:bg-gray-50"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    navigate(`/Order/${row.original.TrackingId}`);
+                  }}
                 >
                   {row.getVisibleCells().map((cell) => (
                     <TableCell key={cell.id}>
@@ -494,6 +564,136 @@ export function DataTableDemo() {
                   className="h-24 text-center"
                 >
                   No orders found.
+                </TableCell>
+              </TableRow>
+            )}
+          </TableBody>
+        </Table>
+      </div>
+    </div>
+  )
+}
+
+/**
+ * ShipperDataTable Component
+ * 
+ * Shipper data ကို sortable၊ filterable table တွင် search functionality ဖြင့် display လုပ်သည်။
+ * Backend API မှ shipper data ကို fetch လုပ်ပြီး TanStack Table ကို အသုံးပြု၍ render လုပ်သည်။
+ * 
+ * Relationships:
+ * - Shipper list ကို display လုပ်ရန် Shipper page component မှ အသုံးပြုသည်
+ * - Backend မှ data fetch လုပ်ရန် getShippers() API function ကို call လုပ်သည်
+ * - MongoDB fields များဖြင့် ShipperData ကို extend လုပ်သော Shipper type ကို အသုံးပြုသည်
+ * - GET /api/shippers endpoint မှ data ကို render လုပ်သည်
+ * - ShipperId ဖြင့် search functionality ကို provide လုပ်သည်
+ * - Data fetch အတွင်း loading state ကို show လုပ်သည်
+ * - Data array ဗလာဖြစ်သောအခါ "No shippers found" ကို display လုပ်သည်
+ */
+export function ShipperDataTable() {
+  const [data, setData] = React.useState<Shipper[]>([]);
+  const [loading, setLoading] = React.useState(true);
+  const [sorting, setSorting] = React.useState<SortingState>([])
+  const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
+    []
+  )
+  const [columnVisibility, setColumnVisibility] =
+    React.useState<VisibilityState>({})
+  const [rowSelection, setRowSelection] = React.useState({})
+
+  React.useEffect(() => {
+    const fetchShippers = async () => {
+      try {
+        const shippers = await getShippers();
+        setData(shippers as Shipper[]);
+      } catch (error) {
+        console.error("Failed to fetch shippers:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchShippers();
+  }, []);
+
+  const table = useReactTable({
+    data,
+    columns: shipperColumns,
+    onSortingChange: setSorting,
+    onColumnFiltersChange: setColumnFilters,
+    getCoreRowModel: getCoreRowModel(),
+    getPaginationRowModel: getPaginationRowModel(),
+    getSortedRowModel: getSortedRowModel(),
+    getFilteredRowModel: getFilteredRowModel(),
+    onColumnVisibilityChange: setColumnVisibility,
+    onRowSelectionChange: setRowSelection,
+    state: {
+      sorting,
+      columnFilters,
+      columnVisibility,
+      rowSelection,
+    },
+  })
+
+  if (loading) {
+    return <div className="p-4">Loading shippers...</div>;
+  }
+
+  return (
+    //Search-Bar//
+    <div className="w-full">
+      <div className="flex items-center py-4">
+        <Input
+          placeholder="Search by Shipper ID..."
+          value={(table.getColumn("ShipperId")?.getFilterValue() as string) ?? ""}
+          onChange={(event) =>
+            table.getColumn("ShipperId")?.setFilterValue(event.target.value)
+          }
+          className="max-w-sm"
+        />
+      </div>
+      <div className="overflow-hidden rounded-md border">
+        <Table>
+          <TableHeader>
+            {table.getHeaderGroups().map((headerGroup) => (
+              <TableRow key={headerGroup.id}>
+                {headerGroup.headers.map((header) => {
+                  return (
+                    <TableHead key={header.id}>
+                      {header.isPlaceholder
+                        ? null
+                        : flexRender(
+                            header.column.columnDef.header,
+                            header.getContext()
+                          )}
+                    </TableHead>
+                  )
+                })}
+              </TableRow>
+            ))}
+          </TableHeader>
+          <TableBody>
+            {table.getRowModel().rows?.length ? (
+              table.getRowModel().rows.map((row) => (
+                <TableRow
+                  key={row.id}
+                  data-state={row.getIsSelected() && "selected"}
+                >
+                  {row.getVisibleCells().map((cell) => (
+                    <TableCell key={cell.id}>
+                      {flexRender(
+                        cell.column.columnDef.cell,
+                        cell.getContext()
+                      )}
+                    </TableCell>
+                  ))}
+                </TableRow>
+              ))
+            ) : (
+              <TableRow>
+                <TableCell
+                  colSpan={shipperColumns.length}
+                  className="h-24 text-center"
+                >
+                  No shippers found.
                 </TableCell>
               </TableRow>
             )}

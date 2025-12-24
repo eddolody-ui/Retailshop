@@ -8,6 +8,7 @@
   import { CreateOrderForm } from "./features/home/pages/CreateOrder.tsx";
   import { Shipper } from "./features/home/pages/Shipper";
   import { CreateShipper } from "./features/home/pages/CreateShipper";
+import { OrderDetail } from "./features/home/pages/OrderDetail.tsx";
 
   const router =createBrowserRouter ([
     {path: '/',element:<HomePage/>},
@@ -15,6 +16,7 @@
     {path:'/Order/CreateOrder',element:<CreateOrderForm/>},
     {path:'/Shipper',element:<Shipper/>},
     {path:'/Shipper/CreateShipper',element:<CreateShipper/>},
+    { path:"/Order/:trackingId", element:<OrderDetail />},
   ])
   
   createRoot(document.getElementById("root")!).render(

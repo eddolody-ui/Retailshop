@@ -13,7 +13,7 @@ import shipperRoutes from "./shipper.rout";
 export const app = express();
 console.log(ENV_VARS.CLIENT_URL);
 
-const whiteList = [ENV_VARS.CLIENT_URL];
+const whiteList = [ENV_VARS.CLIENT_URL, "http://localhost:5173", "http://localhost:5174", "http://localhost:5175"];
 const corsOptions = {
   origin: function (
     origin: any,
@@ -24,6 +24,7 @@ const corsOptions = {
     if (whiteList.includes(origin)) {
       callback(null, true);
     } else {
+      console.log("CORS blocked origin:", origin);
       callback(new Error("Not allowed by CORS"));
     }
   },
@@ -42,5 +43,16 @@ app
 // app.use(routes);
 app.use("/api/orders", orderRoutes);
 app.use("/api/shippers", shipperRoutes);
+
+// Global error handler
+app.use((err: any, req: express.Request, res: express.Response, next: express.NextFunction) => {
+  console.error("Global error handler:", err);
+  res.status(500).json({ message: "Internal server error", error: err.message });
+});
+
+// 404 handler - must be last
+app.use((req: express.Request, res: express.Response) => {
+  res.status(404).json({ message: "Route not found" });
+});
 
 // app.use(errorHandler);

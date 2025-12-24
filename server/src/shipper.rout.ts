@@ -45,4 +45,29 @@ router.get("/", async (req, res) => {
   }
 });
 
+/**
+ * GET /:id - Get Shipper by ID Route
+ *
+ * ၎င်း၏ ID ဖြင့် specific shipper ကို retrieve လုပ်သည်။
+ *
+ * Relationships:
+ * - Individual shipper details ကို fetch လုပ်ရန် client မှ အသုံးပြုနိုင်သည်
+ * - ID filter ဖြင့် Shipper.findById() ကို အသုံးပြုသည်
+ * - Single shipper object ကို return လုပ်သည် သို့မဟုတ် မရှိပါက 404 ကို return လုပ်သည်
+ * - Order detail page နှင့် connect လုပ်နိုင်သည်
+ */
+router.get("/:id", async (req, res) => {
+  try {
+    const shipper = await Shipper.findById(req.params.id);
+
+    if (!shipper) {
+      return res.status(404).json({ message: "Shipper not found" });
+    }
+
+    res.json(shipper);
+  } catch (error) {
+    res.status(500).json({ message: "Failed to fetch shipper", error });
+  }
+});
+
 export default router;

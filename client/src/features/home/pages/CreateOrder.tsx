@@ -3,8 +3,8 @@ import { Button } from "@/components/ui/button"
 import { AppSidebar, TopNavbar } from "@/components/contentarea"
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar"
 import { useNavigate } from "react-router-dom";
-import { useState } from "react";
-import { createOrder } from "@/api/serviceApi";
+import { useState, useEffect } from "react";
+import { createOrder, getShippers, type ShipperData } from "@/api/serviceApi";
 
 /**
  * CreateOrderForm Component
@@ -24,6 +24,22 @@ export function CreateOrderForm() {
   
   // Loading state to disable form during API call
   const [loading, setLoading] = useState(false);
+
+  // Shippers state for dropdown
+  const [shippers, setShippers] = useState<(ShipperData & { _id: string })[]>([]);
+
+  // Fetch shippers on component mount
+  useEffect(() => {
+    const fetchShippers = async () => {
+      try {
+        const shippersData = await getShippers();
+        setShippers(shippersData);
+      } catch (error) {
+        console.error("Error fetching shippers:", error);
+      }
+    };
+    fetchShippers();
+  }, []);
 
   /**
    * handleSubmit Function
@@ -61,7 +77,8 @@ export function CreateOrderForm() {
     CustomerAddress: "",
     Amount: 0,
     Type: "",
-    Note: ""
+    Note: "",
+    shipperId: ""
   });
 
   /**
@@ -166,6 +183,21 @@ export function CreateOrderForm() {
                         <option value="COD">COD</option>
                         <option value="Prepaid">Prepaid</option>
                         <option value="Return">Return</option>
+                      </select>
+                    </div>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Shipper
+                    </label>
+                    <div className="flex gap-2" >
+                      <select onChange={handleChange} value={formData.shipperId} className="rounded-lg focus:ring-2 focus:ring-blue-500 border border-gray-300 px-3 py-2 bg-white text-sm" name="shipperId">
+                        <option value="">Select Shipper (Optional)</option>
+                        {shippers.map((shipper) => (
+                          <option key={shipper._id || shipper.ShipperId} value={shipper._id}>
+                            {shipper.ShipperName} ({shipper.ShipperId})
+                          </option>
+                        ))}
                       </select>
                     </div>
                   </div>

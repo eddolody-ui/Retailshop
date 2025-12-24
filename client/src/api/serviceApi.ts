@@ -20,6 +20,7 @@ export interface OrderData {
   Amount: number;
   Type: string;
   Note: string;
+  shipperId?: string | ShipperData;
 }
 
 /**
@@ -53,6 +54,21 @@ export const createOrder = async (orderData: OrderData) => {
  */
 export const getOrders = async (): Promise<OrderData[]> => {
   const res = await api.get("/orders");
+  return res.data;
+};
+
+/**
+ * getOrder Function
+ * 
+ * Specific order ကို tracking ID ဖြင့် fetch လုပ်သည်။
+ * 
+ * Relationships:
+ * - OrderDetail page တွင် single order data ကို display လုပ်ရန် အသုံးပြုသည်
+ * - /api/orders/:trackingId endpoint သို့ GET request လုပ်သည်
+ * - Backend server ၏ Order.findOne() နှင့် connected ဖြစ်သည်
+ */
+export const getOrder = async (trackingId: string): Promise<OrderData & { _id: string; createdAt: string; updatedAt: string }> => {
+  const res = await api.get(`/orders/${trackingId}`);
   return res.data;
 };
 
@@ -96,18 +112,31 @@ export const createShipper = async (shipperData: ShipperData) => {
 };
 
 /**
- * getOrders Function
+ * getShipper Function
  * 
- * Orders table တွင် display လုပ်ရန် backend API မှ order အားလုံးကို fetch လုပ်သည်။
+ * Specific shipper ကို ID ဖြင့် fetch လုပ်သည်။
  * 
  * Relationships:
- * - DataTableDemo component မှ mount တွင် call လုပ်သည်
- * - Table rendering အတွက် OrderData[] array ကို return လုပ်သည်
- * - /api/orders endpoint သို့ GET request လုပ်သည်
- * - Backend server ၏ Order.find({}) နှင့် connected ဖြစ်သည်
- * - Order page table တွင် data ကို display လုပ်သည်
+ * - OrderDetail page တွင် shipper data ကို display လုပ်ရန် အသုံးပြုသည်
+ * - /api/shippers/:id endpoint သို့ GET request လုပ်သည်
+ * - Backend server ၏ Shipper.findById() နှင့် connected ဖြစ်သည်
  */
-export const getShippers = async (): Promise<ShipperData[]> => {
+export const getShipper = async (id: string): Promise<ShipperData & { _id: string }> => {
+  const res = await api.get(`/shippers/${id}`);
+  return res.data;
+};
+
+/**
+ * getShippers Function
+ * 
+ * Shippers table တွင် display လုပ်ရန် backend API မှ shipper အားလုံးကို fetch လုပ်သည်။
+ * 
+ * Relationships:
+ * - CreateOrder component မှ dropdown အတွက် shipper list ကို fetch လုပ်ရန် အသုံးပြုသည်
+ * - /api/shippers endpoint သို့ GET request လုပ်သည်
+ * - Backend server ၏ Shipper.find({}) နှင့် connected ဖြစ်သည်
+ */
+export const getShippers = async (): Promise<(ShipperData & { _id: string })[]> => {
   const res = await api.get("/shippers");
   return res.data;
 };
