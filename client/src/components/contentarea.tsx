@@ -22,7 +22,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip"
-import { Link, useLocation, useNavigate } from "react-router-dom"
+import { Link, useLocation, useNavigate, useSearchParams } from "react-router-dom"
 //Top-Directory-Link import//
 import {
   Breadcrumb,
@@ -168,7 +168,7 @@ export function AppSidebar() {
 export function TopNavbar() {
   const location = useLocation()
   const paths = location.pathname.split("/").filter(Boolean)
-
+  // useSearchParams is used by the TopNavSearch component below
   return (
     <header className="h-14 border-b flex items-center px-4 bg-background w-full">
       {/* LEFT */}
@@ -200,12 +200,8 @@ export function TopNavbar() {
         )}
       </div>
 
-      {/* SEARCH */}
-      <input
-        type="text"
-        className="p-1.5 px-4 rounded-full border shadow-inner w-56 mr-4"
-        placeholder="Search..."
-      />
+      {/* SEARCH (writes `q` query param) */}
+      <TopNavSearch />
 
       {/* PROFILE DROPDOWN (RIGHT) */}
       <DropdownMenu>
@@ -241,7 +237,7 @@ export function TopNavbar() {
   )
 }
 //Section-For-DashboardCards//
-export default function DashboardPage() {
+export default function Dashboard() {
   return (
     <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
     <StatusCard
@@ -302,7 +298,6 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import { Input } from "@/components/ui/input"
 import {
   Table,
   TableBody,
@@ -453,9 +448,10 @@ export const columns: ColumnDef<Order>[] = [
  * - Data fetch အတွင်း loading state ကို show လုပ်သည်
  * - Data array ဗလာဖြစ်သောအခါ "No orders found" ကို display လုပ်သည်
  */
-export function DataTableDemo() {
+export function OrderDataTable() {
   const navigate = useNavigate()
   const [data, setData] = React.useState<Order[]>([]);
+  const [allData, setAllData] = React.useState<Order[]>([]);
   const [loading, setLoading] = React.useState(true);
   const [sorting, setSorting] = React.useState<SortingState>([])
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
@@ -469,7 +465,39 @@ export function DataTableDemo() {
     const fetchOrders = async () => {
       try {
         const orders = await getOrders();
-        setData(orders as Order[]);
+        // fetch shippers and build map to merge shipper info into orders
+        let shippers: Shipper[] = []
+        try {
+          shippers = await getShippers() as Shipper[]
+        } catch (err) {
+          // if shippers endpoint fails, continue with orders only
+          console.warn('Failed to fetch shippers for merge:', err)
+        }
+
+        const shipperById = new Map<string, Shipper>()
+        for (const s of shippers) {
+          // support both ShipperId and _id keys
+          if ((s as any).ShipperId) shipperById.set((s as any).ShipperId.toString(), s)
+          if (s._id) shipperById.set(s._id.toString(), s)
+        }
+
+        const merged = (orders as Order[]).map((o) => {
+          const copy = { ...o } as any
+          // if shipperId is string, try to map to shipper
+          if (copy.shipperId && typeof copy.shipperId === 'string') {
+            const s = shipperById.get(copy.shipperId)
+            if (s) copy.shipper = s
+          } else if (copy.shipperId && typeof copy.shipperId === 'object') {
+            copy.shipper = copy.shipperId
+          }
+          // expose shipperName and shipperIdentifier for easy search
+          copy.shipperName = (copy.shipper && (copy.shipper.ShipperName || copy.shipper.ShipperName)) || ''
+          copy.shipperIdentifier = (copy.shipper && ((copy.shipper.ShipperId) || (copy.shipper._id))) || ''
+          return copy as Order
+        })
+
+        setData(merged as Order[]);
+        setAllData(merged as Order[]);
       } catch (error) {
         console.error("Failed to fetch orders:", error);
       } finally {
@@ -478,6 +506,34 @@ export function DataTableDemo() {
     };
     fetchOrders();
   }, []);
+
+  // read query param `q` from URL and filter client-side
+  const [searchParams] = useSearchParams();
+  React.useEffect(() => {
+    const q = (searchParams.get('q') || '').trim().toLowerCase()
+    if (!q) {
+      setData(allData)
+      return
+    }
+
+    const filtered = allData.filter((o) => {
+      const tracking = (o.TrackingId || '').toString().toLowerCase()
+      const orderId = (o._id || '').toString().toLowerCase()
+      const customer = (o.CustomerName || '').toString().toLowerCase()
+      const shipperName = (((o as any).shipperName) || ((o as any).shipper && ((o as any).shipper.ShipperName || ''))) .toString().toLowerCase()
+      const shipperId = (((o as any).shipperIdentifier) || ((o as any).shipper && ((o as any).shipper.ShipperId || (o as any).shipper._id) || '')).toString().toLowerCase()
+
+      return (
+        tracking.includes(q) ||
+        orderId.includes(q) ||
+        customer.includes(q) ||
+        shipperName.includes(q) ||
+        shipperId.includes(q)
+      )
+    })
+
+    setData(filtered)
+  }, [searchParams, allData])
 
   const table = useReactTable({
     data,
@@ -503,17 +559,9 @@ export function DataTableDemo() {
   }
 
   return (
-    //Search-Bar//
     <div className="w-full">
       <div className="flex items-center py-4">
-        <Input
-          placeholder="Search by Tracking ID..."
-          value={(table.getColumn("TrackingId")?.getFilterValue() as string) ?? ""}
-          onChange={(event) =>
-            table.getColumn("TrackingId")?.setFilterValue(event.target.value)
-          }
-          className="max-w-sm"
-        />
+        {/* Search is handled by the top navbar (q query param) */}
       </div>
       <div className="overflow-hidden rounded-md border">
         <Table>
@@ -591,6 +639,7 @@ export function DataTableDemo() {
  */
 export function ShipperDataTable() {
   const [data, setData] = React.useState<Shipper[]>([]);
+  const [allData, setAllData] = React.useState<Shipper[]>([]);
   const [loading, setLoading] = React.useState(true);
   const [sorting, setSorting] = React.useState<SortingState>([])
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
@@ -599,20 +648,72 @@ export function ShipperDataTable() {
   const [columnVisibility, setColumnVisibility] =
     React.useState<VisibilityState>({})
   const [rowSelection, setRowSelection] = React.useState({})
-
   React.useEffect(() => {
-    const fetchShippers = async () => {
+    const fetchShipper = async () => {
       try {
-        const shippers = await getShippers();
-        setData(shippers as Shipper[]);
+        // fetch shippers and build map to merge shipper info into orders
+        let shipper: Shipper[] = []
+        try {
+          shipper = await getShippers() as Shipper[]
+        } catch (err) {
+          // if shippers endpoint fails, continue with orders only
+          console.warn('Failed to fetch shippers for merge:', err)
+        }
+
+        const shipperById = new Map<string, Shipper>()
+        for (const s of shipper) {
+          // support both ShipperId and _id keys
+          if ((s as any).ShipperId) shipperById.set((s as any).ShipperId.toString(), s)
+          if (s._id) shipperById.set(s._id.toString(), s)
+        }
+
+        const merged = (shipper as Shipper[]).map((o) => {
+          const copy = { ...o } as any
+          // if shipperId is string, try to map to shipper
+          if (copy.shipperId && typeof copy.shipperId === 'string') {
+            const s = shipperById.get(copy.shipperId)
+            if (s) copy.shipper = s
+          } else if (copy.shipperId && typeof copy.shipperId === 'object') {
+            copy.shipper = copy.shipperId
+          }
+          // expose shipperName and shipperIdentifier for easy search
+          copy.shipperName = (copy.shipper && (copy.shipper.ShipperName || copy.shipper.ShipperName)) || ''
+          copy.shipperIdentifier = (copy.shipper && ((copy.shipper.ShipperId) || (copy.shipper._id))) || ''
+          return copy as Shipper
+        })
+
+        setData(merged as Shipper[]);
+        setAllData(merged as Shipper[]);
       } catch (error) {
-        console.error("Failed to fetch shippers:", error);
+        console.error("Failed to fetch Shipper:", error);
       } finally {
         setLoading(false);
       }
     };
-    fetchShippers();
+    fetchShipper();
   }, []);
+
+  // read query param `q` from URL and filter client-side
+    const [searchParams] = useSearchParams();
+  React.useEffect(() => {
+    const q = (searchParams.get('q') || '').trim().toLowerCase()
+    if (!q) {
+      setData(allData)
+      return
+    }
+
+    const filtered = allData.filter((o) => {
+      const ShipperId = String(o.ShipperId || '').toString().toLowerCase()
+      const shipperName = String(o.ShipperName || '').toString().toLowerCase()
+      return (
+        shipperName.includes(q) ||
+        ShipperId.includes(q)
+      )
+    })
+
+    setData(filtered)
+  }, [searchParams, allData])
+
 
   const table = useReactTable({
     data,
@@ -640,16 +741,6 @@ export function ShipperDataTable() {
   return (
     //Search-Bar//
     <div className="w-full">
-      <div className="flex items-center py-4">
-        <Input
-          placeholder="Search by Shipper ID..."
-          value={(table.getColumn("ShipperId")?.getFilterValue() as string) ?? ""}
-          onChange={(event) =>
-            table.getColumn("ShipperId")?.setFilterValue(event.target.value)
-          }
-          className="max-w-sm"
-        />
-      </div>
       <div className="overflow-hidden rounded-md border">
         <Table>
           <TableHeader>
@@ -701,5 +792,30 @@ export function ShipperDataTable() {
         </Table>
       </div>
     </div>
+  )
+}
+
+// Top-nav search component: updates `q` query param
+function TopNavSearch() {
+  const [searchParams, setSearchParams] = useSearchParams();
+  const q = searchParams.get("q") || "";
+
+  const onChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const val = e.target.value
+    if (val) {
+      setSearchParams({ q: val })
+    } else {
+      setSearchParams({})
+    }
+  }
+
+  return (
+    <input
+      type="text"
+      className="p-1.5 px-4 rounded-full border shadow-inner w-56 mr-4"
+      placeholder="Search..."
+      value={q}
+      onChange={onChange}
+    />
   )
 }

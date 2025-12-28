@@ -1,9 +1,7 @@
 import { SidebarProvider, SidebarInset } from "@/components/ui/sidebar"
 import { AppSidebar, TopNavbar } from "@/components/contentarea"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import { ArrowLeft, Package, User, Phone, MapPin, DollarSign, Calendar, FileText } from "lucide-react"
+import { ArrowLeft } from "lucide-react"
 import { Link, useParams } from "react-router-dom"
 import { useEffect, useState } from "react"
 import { getOrder, getShipper, type OrderData, type ShipperData } from "@/api/serviceApi"
@@ -30,16 +28,13 @@ export function OrderDetail() {
         // Handle shipper data - either populated object or string reference
         if (orderData.shipperId) {
           if (typeof orderData.shipperId === 'object' && orderData.shipperId !== null) {
-            // Already populated
             setShipper(orderData.shipperId as ShipperData & { _id: string })
           } else if (typeof orderData.shipperId === 'string') {
-            // Need to fetch shipper data separately
             try {
               const shipperData = await getShipper(orderData.shipperId)
               setShipper(shipperData)
             } catch (shipperError) {
               console.error("Error fetching shipper:", shipperError)
-              // Shipper not found, leave as null
             }
           }
         }
@@ -136,177 +131,77 @@ export function OrderDetail() {
         <SidebarInset className="flex flex-col w-full">
           <TopNavbar />
 
-          {/* Header */}
-          <div className="flex items-center justify-between p-6 border-b">
-            <div className="flex items-center gap-4">
-              <Link to="/Order">
-                <Button variant="outline" size="sm">
-                  <ArrowLeft className="mr-2 h-4 w-4" />
-                  Back to Orders
-                </Button>
-              </Link>
-              <div>
-                <h1 className="text-2xl font-bold">Order Details</h1>
-                <p className="text-gray-600">Tracking ID: {order.TrackingId}</p>
-              </div>
-            </div>
-            <Badge variant="secondary" className="text-sm">
-              {order.Type}
-            </Badge>
-          </div>
+          {/* Centered card matching mock: left info | center status + timeline | right actions */}
+          <div className="flex-1">
+            <div className="max-w-5xl mx-auto overflow-hidden">
+              <div className="grid grid-cols-12">
+                {/* Left column: customer & seller info (3/12) */}
+                <div className="col-span-12 md:col-span-3 border-r px-6 py-8">
+                  <div className="mb-6">
+                    <div className="text-xs text-gray-400">Customer Name</div>
+                    <div className="mt-1 font-medium">{order.CustomerName || '—'}</div>
+                  </div>
+                  <div className="mb-6">
+                    <div className="text-xs text-gray-400">Customer Contact</div>
+                    <div className="mt-1 text-sm text-gray-700">{order.CustomerContact || '—'}</div>
+                  </div>
+                  <div className="mb-6">
+                    <div className="text-xs text-gray-400">Delivery Address</div>
+                    <div className="mt-1 text-sm text-gray-700">{order.CustomerAddress || '—'}</div>
+                  </div>
+                  <div className="mt-6 pt-6 border-t">
+                    <div className="text-xs text-gray-400">Seller</div>
+                    <div className="mt-1 text-sm">{(shipper as any).ShipperName || 'N/A'}</div>
+                    <div className="text-xs text-gray-400 mt-3">Seller Contact</div>
+                    <div className="text-sm">{(shipper as any).ShipperContact || '—'}</div>
+                  </div>
+                </div>
 
-          {/* Content */}
-          <div className="flex-1 p-6">
-            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-              {/* Order Information */}
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Package className="h-5 w-5" />
-                    Order Information
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div>
-                    <label className="text-sm font-medium text-gray-600">Tracking ID</label>
-                    <p className="text-lg font-semibold">{order.TrackingId || 'N/A'}</p>
-                  </div>
-                  <div>
-                    <label className="text-sm font-medium text-gray-600">Type</label>
-                    <p>{order.Type || 'N/A'}</p>
-                  </div>
-                  <div>
-                    <label className="text-sm font-medium text-gray-600">Amount</label>
-                    <p className="text-xl font-bold text-green-600">
-                      ${typeof order.Amount === 'number' ? order.Amount.toFixed(2) : '0.00'}
-                    </p>
-                  </div>
-                </CardContent>
-              </Card>
-
-              {/* Customer Information */}
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <User className="h-5 w-5" />
-                    Customer Information
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div>
-                    <label className="text-sm font-medium text-gray-600">Name</label>
-                    <p className="text-lg">{order.CustomerName || 'N/A'}</p>
-                  </div>
-                  <div>
-                    <label className="text-sm font-medium text-gray-600 flex items-center gap-1">
-                      <Phone className="h-4 w-4" />
-                      Contact
-                    </label>
-                    <p>{order.CustomerContact || 'N/A'}</p>
-                  </div>
-                  <div>
-                    <label className="text-sm font-medium text-gray-600 flex items-center gap-1">
-                      <MapPin className="h-4 w-4" />
-                      Address
-                    </label>
-                    <p>{order.CustomerAddress || 'N/A'}</p>
-                  </div>
-                </CardContent>
-              </Card>
-
-              {/* Shipper Information */}
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Package className="h-5 w-5" />
-                    Shipper Information
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  {shipper ? (
-                    <>
-                      <div>
-                        <label className="text-sm font-medium text-gray-600">Shipper ID</label>
-                        <p className="text-lg font-semibold">{shipper.ShipperId || 'N/A'}</p>
-                      </div>
-                      <div>
-                        <label className="text-sm font-medium text-gray-600">Name</label>
-                        <p>{shipper.ShipperName || 'N/A'}</p>
-                      </div>
-                      <div>
-                        <label className="text-sm font-medium text-gray-600 flex items-center gap-1">
-                          <Phone className="h-4 w-4" />
-                          Contact
-                        </label>
-                        <p>{shipper.ShipperContact || 'N/A'}</p>
-                      </div>
-                      <div>
-                        <label className="text-sm font-medium text-gray-600 flex items-center gap-1">
-                          <MapPin className="h-4 w-4" />
-                          Address
-                        </label>
-                        <p>{shipper.ShipperAddress || 'N/A'}</p>
-                      </div>
-                      <div>
-                        <label className="text-sm font-medium text-gray-600">Pick Up Address</label>
-                        <p>{shipper.PickUpAddress || 'N/A'}</p>
-                      </div>
-                      <div>
-                        <label className="text-sm font-medium text-gray-600">Billing Type</label>
-                        <p>{shipper.BillingType || 'N/A'}</p>
-                      </div>
-                    </>
-                  ) : (
-                    <div className="text-center py-4">
-                      <p className="text-gray-500">No shipper assigned to this order</p>
-                      <Button variant="outline" size="sm" className="mt-2">
-                        Assign Shipper
-                      </Button>
+                {/* Middle column: tracking & status (6/12) */}
+                <div className="col-span-12 md:col-span-6 px-8 py-8">
+                  <div className="flex items-start justify-between">
+                    <div className="flex justify-end gap-130">
+                      <div className="font-semibold text-gray-800 mt-1.5">#{order.TrackingId}</div>
+                      <Button variant="ghost" className="rounded border">Update Status</Button>
                     </div>
-                  )}
-                </CardContent>
-              </Card>
-
-              {/* Additional Details */}
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <FileText className="h-5 w-5" />
-                    Additional Details
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div>
-                    <label className="text-sm font-medium text-gray-600">Notes</label>
-                    <p className="text-sm text-gray-700">
-                      {order.Note || "No additional notes"}
-                    </p>
+                    <div className="mt-2 flex flex-col gap-2 bg-gray-100 rounded-md">
+                    
+                    </div>
                   </div>
-                  <div>
-                    <label className="text-sm font-medium text-gray-600 flex items-center gap-1">
-                      <Calendar className="h-4 w-4" />
-                      Created
-                    </label>
-                    <p className="text-sm">
-                      {order.createdAt ? new Date(order.createdAt).toLocaleDateString() : 'N/A'}
-                    </p>
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
 
-            {/* Action Buttons */}
-            <div className="mt-8 flex gap-4">
-              <Button variant="outline">
-                <DollarSign className="mr-2 h-4 w-4" />
-                Process Payment
-              </Button>
-              <Button variant="outline">
-                Print Invoice
-              </Button>
-              <Button variant="outline">
-                Update Status
-              </Button>
+                  <div className="mt-6">
+                    <div className="text-sm text-gray-400">your order is</div>
+                    <div className="mt-2 text-4xl font-extrabold text-gray-900">{order.Status || 'Unknown'}</div>
+                    <div className="mt-2 text-sm text-gray-500">{order.Status === 'Delivered' && order.updatedAt ? `as on ${new Date(order.updatedAt).toLocaleDateString()}` : ''}</div>
+                    <div className="mt-2 text-xs text-gray-400">Last updated on {order.updatedAt ? new Date(order.updatedAt).toLocaleDateString() : '—'}</div>
+                  </div>
+
+                  {/* Tracking History / Timeline */}
+                  <div className="mt-8">
+                    <div className="text-sm font-medium mb-4">Tracking History</div>
+                    <div className="relative">
+                      {/* vertical line */}
+                      <div className="absolute left-6 top-0 bottom-0 w-px bg-gray-200"></div>
+                      <ul className="space-y-6 pl-12">
+                        {(() => {
+                          const logs = (order as any).Logs || (order as any).logs || []
+                          if (!logs || logs.length === 0) {
+                            return <li className="text-sm text-gray-500">No tracking events available.</li>
+                          }
+                          return (logs.slice().reverse().map((entry: any, idx: number) => (
+                            <li key={idx} className="relative">
+                              <div className="absolute -left-9 top-0 h-3 w-3 rounded-full bg-white border-2 border-blue-600"></div>
+                              <div className="text-sm font-medium">{entry.message || entry.event || 'Event'}</div>
+                              <div className="text-xs text-gray-400 mt-1">{entry.timestamp ? new Date(entry.timestamp).toLocaleString() : (entry.time ? new Date(entry.time).toLocaleString() : '')}</div>
+                            </li>
+                            
+                          )))
+                        })()}
+                      </ul>
+                    </div>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
         </SidebarInset>

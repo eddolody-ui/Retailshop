@@ -2,7 +2,7 @@ import { SidebarProvider, SidebarInset } from "@/components/ui/sidebar"
 import { AppSidebar } from "@/components/contentarea"
 import { TopNavbar } from "@/components/contentarea"
 import DashboardPage from "@/components/contentarea"
-import {DataTableDemo} from "@/components/contentarea"
+import {OrderDataTable} from "@/components/contentarea"
 
 export function HomePage() {
   return (
@@ -19,7 +19,7 @@ export function HomePage() {
       {/* Page content */}
       <main className="flex-1 p-4">
         <DashboardPage/>
-        <DataTableDemo/>
+        <OrderDataTable/>
       </main>
     </SidebarInset>
   </div>

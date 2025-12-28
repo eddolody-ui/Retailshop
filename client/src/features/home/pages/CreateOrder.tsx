@@ -60,7 +60,7 @@ export function CreateOrderForm() {
     setLoading(true);
     try {
       await createOrder(formData);
-      navigate("/Order"); // ⬅️ redirect to order page
+      navigate("/Order"); // ⬅️ redirect to order page 
     } catch (error) {
       console.error("Error creating order:", error);
       // You can add error handling here, like showing a toast
@@ -78,7 +78,8 @@ export function CreateOrderForm() {
     Amount: 0,
     Type: "",
     Note: "",
-    shipperId: ""
+    shipperId: "",
+    Status: "",
   });
 
   /**
