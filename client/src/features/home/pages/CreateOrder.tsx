@@ -24,6 +24,8 @@ export function CreateOrderForm() {
   
   // Loading state to disable form during API call
   const [loading, setLoading] = useState(false);
+  // Error state for feedback
+  const [error, setError] = useState<string | null>(null);
 
   // Shippers state for dropdown
   const [shippers, setShippers] = useState<(ShipperData & { _id: string })[]>([]);
@@ -58,12 +60,18 @@ export function CreateOrderForm() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
+    setError(null);
+    // Ensure Status is set to 'Pending' if not selected
+    const submitData = {
+      ...formData,
+      Status: formData.Status || 'Pending',
+    };
     try {
-      await createOrder(formData);
+      await createOrder(submitData);
       navigate("/Order"); // ⬅️ redirect to order page 
-    } catch (error) {
+    } catch (error: any) {
+      setError(error?.response?.data?.message || "Error creating order");
       console.error("Error creating order:", error);
-      // You can add error handling here, like showing a toast
     } finally {
       setLoading(false);
     }
@@ -76,10 +84,10 @@ export function CreateOrderForm() {
     CustomerContact: "",
     CustomerAddress: "",
     Amount: 0,
-    Type: "",
+    Type: "COD",
     Note: "",
     shipperId: "",
-    Status: "",
+    Status: "Pending",
   });
 
   /**
@@ -113,6 +121,11 @@ export function CreateOrderForm() {
                 <h2 className="text-xl font-semibold text-gray-800 mb-6 border-b pb-2">
                   Create Order
                 </h2>
+                {error && (
+                  <div className="mb-4 text-red-600 bg-red-50 border border-red-200 rounded p-2">
+                    {error}
+                  </div>
+                )}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -124,6 +137,7 @@ export function CreateOrderForm() {
                       value={formData.TrackingId}
                       placeholder="Enter Tracking ID"
                       className="rounded-lg focus:ring-2 focus:ring-blue-500"
+                      required
                     />
                   </div>
                   <div>
@@ -136,6 +150,7 @@ export function CreateOrderForm() {
                       name="CustomerName"
                       placeholder="Enter Customer name"
                       className="rounded-lg focus:ring-2 focus:ring-blue-500"
+                      required
                     />
                   </div>
 
@@ -149,6 +164,7 @@ export function CreateOrderForm() {
                       name="CustomerContact"
                       placeholder="Enter Customer number"
                       className="rounded-lg focus:ring-2 focus:ring-blue-500"
+                      required
                     />
                   </div>
                   <div>
@@ -161,6 +177,7 @@ export function CreateOrderForm() {
                       name="CustomerAddress"
                       placeholder="Enter full address"
                       className="rounded-lg focus:ring-2 focus:ring-blue-500"
+                      required
                     />
                   </div>
                   <div>
@@ -173,6 +190,9 @@ export function CreateOrderForm() {
                       name="Amount"
                       placeholder="Enter Amount"
                       className="rounded-lg focus:ring-2 focus:ring-blue-500"
+                      required
+                      type="number"
+                      min={0}
                     />
                   </div>
                   <div>
@@ -180,7 +200,7 @@ export function CreateOrderForm() {
                       Type
                     </label>
                     <div className="flex gap-2" >
-                      <select onChange={handleChange} value={formData.Type} className="rounded-lg focus:ring-2 focus:ring-blue-500 border border-gray-300 px-3 py-2 bg-white text-sm" name="Type">
+                      <select onChange={handleChange} value={formData.Type} className="rounded-lg focus:ring-2 focus:ring-blue-500 border border-gray-300 px-3 py-2 bg-white text-sm" name="Type" required>
                         <option value="COD">COD</option>
                         <option value="Prepaid">Prepaid</option>
                         <option value="Return">Return</option>
@@ -230,6 +250,7 @@ export function CreateOrderForm() {
                     file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 
                     file:text-sm file:font-medium file:bg-blue-50 file:text-blue-700 
                      hover:file:bg-blue-100"
+                    disabled={loading}
                     />
                     <Button type="submit" disabled={loading} className="px-6 py-2 rounded-lg ml-133 bg-blue-600 hover:bg-blue-500 text-white">
                       {loading ? "Creating..." : "Create Order"}

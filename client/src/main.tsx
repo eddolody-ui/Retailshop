@@ -19,6 +19,7 @@
     {path:'/Shipper/CreateShipper',element:<CreateShipper/>},
     {path:"/Order/:trackingId", element:<OrderDetail />},
     {path:"/Shipper/:shipperId", element:<ShipperDetail />},
+    {path:"/Shipper/:shipperId/CreateOrder", element:<CreateOrderForm />},
   ])
   
   createRoot(document.getElementById("root")!).render(

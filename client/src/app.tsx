@@ -80,6 +80,7 @@ function App() {
               <Route path="/Shipper" element={<Shipper/>}/>
               <Route path="/Shipper/CreateShipper" element={<CreateShipper/>}/>
               <Route path="/Shipper/:shipperId" element={<ShipperDetail />} />
+              <Route path="/Shipper/:shipperId/CreateOrder" element={<CreateOrderForm />} />
           </Routes>
       </BrowserRouter>
     </ErrorBoundary>

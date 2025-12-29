@@ -18,10 +18,22 @@ const router = Router();
  */
 router.post("/", async (req, res) => {
   try {
+    console.log("POST /api/orders body:", req.body);
+    // Convert shipperId to ObjectId if present and valid
+    if (req.body.shipperId) {
+      const mongoose = require('mongoose');
+      if (mongoose.Types.ObjectId.isValid(req.body.shipperId)) {
+        req.body.shipperId = new mongoose.Types.ObjectId(req.body.shipperId);
+      } else {
+        return res.status(400).json({ message: "Invalid shipperId ObjectId" });
+      }
+    }
     const savedOrder = await saveOrder(req.body);
     res.status(201).json(savedOrder);
-  } catch (error) {
-    res.status(400).json({ message: "Order save failed", error });
+  } catch (error: any) {
+    console.error("Order save error details:", error);
+    const errMsg = error?.message || (typeof error === 'string' ? error : JSON.stringify(error));
+    res.status(400).json({ message: "Order save failed", error: errMsg });
   }
 });
 
