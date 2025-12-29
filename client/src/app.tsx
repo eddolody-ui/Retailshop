@@ -5,6 +5,7 @@ import { OrderDetail } from "@/features/home/pages/OrderDetail";
 import { CreateOrderForm } from "@/features/home/pages/CreateOrder";
 import { Shipper } from "./features/home/pages/Shipper";
 import { CreateShipper } from "./features/home/pages/CreateShipper";
+import { ShipperDetail } from "./features/home/pages/ShipperDetail";
 import { Component } from "react";
 import type { ErrorInfo, ReactNode } from "react";
 
@@ -78,6 +79,7 @@ function App() {
               <Route path="/Order/:trackingId" element={<OrderDetail />} />
               <Route path="/Shipper" element={<Shipper/>}/>
               <Route path="/Shipper/CreateShipper" element={<CreateShipper/>}/>
+              <Route path="/Shipper/:shipperId" element={<ShipperDetail />} />
           </Routes>
       </BrowserRouter>
     </ErrorBoundary>

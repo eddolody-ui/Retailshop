@@ -50,7 +50,7 @@ const order_rout_1 = __importDefault(require("./order.rout"));
 const shipper_rout_1 = __importDefault(require("./shipper.rout"));
 exports.app = (0, express_1.default)();
 console.log(envVars_1.ENV_VARS.CLIENT_URL);
-const whiteList = [envVars_1.ENV_VARS.CLIENT_URL];
+const whiteList = [envVars_1.ENV_VARS.CLIENT_URL, "http://localhost:5173", "http://localhost:5174", "http://localhost:5175"];
 const corsOptions = {
     origin: function (origin, callback) {
         // allow requests with no origin (eg. mobile app and curl request(s) like postman third party software)
@@ -60,6 +60,7 @@ const corsOptions = {
             callback(null, true);
         }
         else {
+            console.log("CORS blocked origin:", origin);
             callback(new Error("Not allowed by CORS"));
         }
     },
@@ -76,4 +77,13 @@ exports.app
 // app.use(routes);
 exports.app.use("/api/orders", order_rout_1.default);
 exports.app.use("/api/shippers", shipper_rout_1.default);
+// Global error handler
+exports.app.use((err, req, res, next) => {
+    console.error("Global error handler:", err);
+    res.status(500).json({ message: "Internal server error", error: err.message });
+});
+// 404 handler - must be last
+exports.app.use((req, res) => {
+    res.status(404).json({ message: "Route not found" });
+});
 // app.use(errorHandler);

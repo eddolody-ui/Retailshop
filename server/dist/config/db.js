@@ -53,6 +53,10 @@ const OrderSchema = new mongoose_1.default.Schema({
     Amount: { type: Number, required: true },
     Type: { type: String, required: true },
     Note: { type: String },
+    shipperId: { type: mongoose_1.default.Schema.Types.ObjectId, ref: 'Shipper' },
+    Status: { type: String,
+        enum: ["Pending", "Hub Inbound", "Arrive At Softing Hub", "In Route", "Delivered", "Return To Sender", "Cancelled"],
+        default: "Pending" },
 }, { timestamps: true });
 /* =======================
    Order Model (Safe)

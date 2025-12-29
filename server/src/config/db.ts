@@ -43,6 +43,9 @@ const OrderSchema = new mongoose.Schema(
     Type: { type: String, required: true },
     Note: { type: String },
     shipperId: { type: mongoose.Schema.Types.ObjectId, ref: 'Shipper' },
+    Status: { type: String, 
+              enum: ["Pending", "Hub Inbound", "Arrive At Softing Hub", "In Route", "Delivered", "Return To Sender", "Cancelled"],
+              default: "Pending" },
   },
   { timestamps: true }
 );
@@ -91,7 +94,6 @@ const saveOrder = async (orderData: any) => {
 };
 
 export { Order, saveOrder };
-
 
 const ShipperSchema = new mongoose.Schema({
     ShipperId: { type: String, required: true },

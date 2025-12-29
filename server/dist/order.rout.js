@@ -48,7 +48,7 @@ router.post("/", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
  */
 router.get("/", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const orders = yield db_2.Order.find({});
+        const orders = yield db_2.Order.find({}).populate('shipperId');
         res.json(orders);
     }
     catch (error) {
@@ -70,7 +70,7 @@ router.get("/:trackingId", (req, res) => __awaiter(void 0, void 0, void 0, funct
     try {
         const order = yield db_2.Order.findOne({
             TrackingId: req.params.trackingId,
-        });
+        }).populate('shipperId');
         if (!order) {
             return res.status(404).json({ message: "Order not found" });
         }

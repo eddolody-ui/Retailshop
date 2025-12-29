@@ -45,12 +45,8 @@ const items: MenuItem[] = [
   { title: "Dashboard", url: "/", 
     icon: FiAirplay },
   
-  { title: "Order",
+  { title: "Order", url:"/Order",
     icon: FiShoppingCart,
-    children: [
-      { title: "Order", url:"/Order", icon: Users },
-      { title: "Security", url: "/security", icon: Lock },
-    ],
   },
 
  { title: "Shipper",
@@ -236,23 +232,41 @@ export function TopNavbar() {
     </header>
   )
 }
+
+
 //Section-For-DashboardCards//
 export default function Dashboard() {
+  const [pendingCount, setPendingCount] = useState<number>(0);
+  const [totalOrders, setTotalOrders] = useState<number>(0);
+
+  useEffect(() => {
+    const fetchOrderStats = async () => {
+      try {
+        const orders = await getOrders();
+        setTotalOrders(orders.length);
+        const pendingOrders = orders.filter(order => order.Status === 'Pending');
+        setPendingCount(pendingOrders.length);
+      } catch (error) {
+        console.error("Failed to fetch order stats:", error);
+        // Set default values if API fails
+        setTotalOrders(0);
+        setPendingCount(0);
+      }
+    };
+    fetchOrderStats();
+  }, []);
+  
   return (
     <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
     <StatusCard
         title="Total Orders"
-        value={1245}
-        trend="up"
-        trendValue="12% today"
+        value={totalOrders.toString()}
         icon={<FiShoppingCart className="h-5 w-5" />}
         />
 
     <StatusCard
-        title="Revenue"
-        value="$8,540"
-        trend="up"
-        trendValue="8% this month"
+        title="Pending"
+        value={pendingCount.toString()}
         icon={<CgTrending className="h-5 w-5"/>}
     />
 
@@ -274,6 +288,77 @@ export default function Dashboard() {
     </div>
   )
 }
+
+export  function EachShipperData({ shipperId }: { shipperId?: string } = {}) {
+  const [pendingCount, setPendingCount] = useState<number>(0);
+  const [totalOrders, setTotalOrders] = useState<number>(0);
+
+  useEffect(() => {
+    const fetchOrderStats = async () => {
+      try {
+        const orders = await getOrders();
+        
+        // Filter orders by shipper if shipperId is provided
+        let filteredOrders = orders;
+        if (shipperId) {
+          filteredOrders = orders.filter(order => {
+            if (typeof order.shipperId === 'string') {
+              return order.shipperId === shipperId;
+            } else if (typeof order.shipperId === 'object' && order.shipperId) {
+              const shipperObj = order.shipperId as { ShipperId?: string; _id?: string };
+              return shipperObj.ShipperId === shipperId || shipperObj._id === shipperId;
+            }
+            return false;
+          });
+        }
+        
+        setTotalOrders(filteredOrders.length);
+        const pendingOrders = filteredOrders.filter(order => order.Status === 'Pending');
+        setPendingCount(pendingOrders.length);
+      } catch (error) {
+        console.error("Failed to fetch order stats:", error);
+        // Set default values if API fails
+        setTotalOrders(0);
+        setPendingCount(0);
+      }
+    };
+    fetchOrderStats();
+  }, [shipperId]);
+  
+  return (
+    <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+    <StatusCard
+        title="Total Orders"
+        value={totalOrders.toString()}
+        icon={<FiShoppingCart className="h-5 w-5" />}
+        />
+
+    <StatusCard
+        title="Pending"
+        value={pendingCount.toString()}
+        icon={<CgTrending className="h-5 w-5"/>}
+    />
+
+    <StatusCard
+        title="Customers"
+        value={320}
+        trend="down"
+        trendValue="3% this week"
+        icon={<Users className="h-5 w-5" />}
+        />
+
+    <StatusCard
+        title="Shipment"
+        value={628}
+        trend="up"
+        trendValue="70% this month"
+        icon={<IoCarSport className="h-5 w-5" />}
+        />
+    </div>
+  )
+}
+
+
 //Section-For-DataTable//
 import * as React from "react"
 import {
@@ -307,111 +392,114 @@ import {
   TableRow,
 } from "@/components/ui/table"
 import { getOrders, getShippers, type OrderData, type ShipperData } from "@/api/serviceApi"
+import { Skeleton } from "@/components/ui/skeleton"
+import { useEffect, useState } from "react";
 
 export type Order = OrderData & { _id: string; createdAt: string; updatedAt: string };
 export type Shipper = ShipperData & { _id: string; createdAt: string; updatedAt: string };
 export const shipperColumns: ColumnDef<Shipper>[] = [
   {
     accessorKey: "ShipperId",
-    header: () => <div className="ml-9">Shipper ID</div>,
+    header: () => <div className="flex justify-center">Shipper ID</div>,
     cell: ({ row }) => (
-      <div className="capitalize ml-10">{row.getValue("ShipperId")}</div>
+      <div className="capitalize flex justify-center">{row.getValue("ShipperId")}</div>
     ),
   },
   {
     accessorKey: "ShipperName",
-    header: () => <div>Shipper Name</div>,
+    header: () => <div className="flex justify-center">Shipper Name</div>,
     cell: ({ row }) => (
-      <div className="capitalize ml-3">{row.getValue("ShipperName")}</div>
+      <div className="capitalize flex justify-center">{row.getValue("ShipperName")}</div>
     ),
   },
   {
     accessorKey: "ShipperContact",
-    header: () => <div>Contact</div>,
+    header: () => <div className="flex justify-center">Contact</div>,
     cell: ({ row }) => (
-      <div className="capitalize">{row.getValue("ShipperContact")}</div>
+      <div className="capitalize flex justify-center">{row.getValue("ShipperContact")}</div>
     ),
   },
   {
     accessorKey: "ShipperAddress",
-    header: () => <div>Address</div>,
+    header: () => <div className="flex justify-center">Address</div>,
     cell: ({ row }) => (
-      <div className="capitalize">{row.getValue("ShipperAddress")}</div>
+      <div className="capitalize flex justify-center">{row.getValue("ShipperAddress")}</div>
     ),
   },
   {
     accessorKey: "PickUpAddress",
-    header: () => <div>Pick Up Address</div>,
+    header: () => <div className="flex justify-center">Pick Up Address</div>,
     cell: ({ row }) => (
-      <div className="capitalize">{row.getValue("PickUpAddress")}</div>
+      <div className="capitalize flex justify-center">{row.getValue("PickUpAddress")}</div>
     ),
   },
   {
     accessorKey: "BillingType",
-    header: () => <div>Billing Type</div>,
+    header: () => <div className="flex justify-center">Billing Type</div>,
     cell: ({ row }) => (
-      <div className="capitalize">{row.getValue("BillingType")}</div>
+      <div className="capitalize flex justify-center">{row.getValue("BillingType")}</div>
     ),
   },
   {
     accessorKey: "createdAt",
-    header: () => <div className="ml-3">Date Created</div>,
+    header: () => <div className="flex justify-center">Date Created</div>,
     cell: ({ row }) => {
       const date = new Date(row.getValue("createdAt")).toLocaleDateString();
-      return <div className="capitalize">{date}</div>
+      return <div className="capitalize flex justify-center">{date}</div>
     },
   },
 ]
+
 export const columns: ColumnDef<Order>[] = [
-  {
-    accessorKey: "TrackingId",
-    header: () => <div className="ml-9">Tracking ID</div>,
-    cell: ({ row }) => (
-      <div className="capitalize ml-10">{row.getValue("TrackingId")}</div>
-    ),
-  },
-  {
-    accessorKey: "CustomerName",
-    header: () => <div>Customer Name</div>,
-    cell: ({ row }) => (
-      <div className="capitalize ml-3">{row.getValue("CustomerName")}</div>
-    ),
-  },
-  {
-    accessorKey: "CustomerContact",
-    header: () => <div>Contact</div>,
-    cell: ({ row }) => (
-      <div className="capitalize">{row.getValue("CustomerContact")}</div>
-    ),
-  },
-  {
-    accessorKey: "CustomerAddress",
-    header: () => <div>Address</div>,
-    cell: ({ row }) => (
-      <div className="capitalize">{row.getValue("CustomerAddress")}</div>
-    ),
-  },
-  {
-    accessorKey: "Type",
-    header: () => <div>Type</div>,
-    cell: ({ row }) => (
-      <div className="capitalize">{row.getValue("Type")}</div>
-    ),
-  },
-  {
+    {
     accessorKey: "shipperId",
-    header: () => <div>Shipper</div>,
+    header: () => <div className="flex justify-center">Shipper</div>,
     cell: ({ row }) => {
       const shipperId = row.getValue("shipperId") as any;
       if (shipperId && typeof shipperId === 'object' && shipperId.ShipperName) {
-        return <div className="capitalize">{shipperId.ShipperName}</div>
+        return <div className="capitalize flex justify-center">{shipperId.ShipperName}</div>
       }
       return <div className="text-gray-500">Not assigned</div>
     },
   },
   {
+    accessorKey: "TrackingId",
+    header: () => <div className="flex justify-center">Tracking ID</div>,
+    cell: ({ row }) => (
+      <div className="capitalize justify-center flex">{row.getValue("TrackingId")}</div>
+    ),
+  },
+  {
+    accessorKey: "CustomerName",
+    header: () => <div className="flex justify-center">Customer Name</div>,
+    cell: ({ row }) => (
+      <div className="capitalize flex justify-center">{row.getValue("CustomerName")}</div>
+    ),
+  },
+  {
+    accessorKey: "CustomerContact",
+    header: () => <div className="flex justify-center">Contact</div>,
+    cell: ({ row }) => (
+      <div className="capitalize flex justify-center">{row.getValue("CustomerContact")}</div>
+    ),
+  },
+  {
+    accessorKey: "CustomerAddress",
+    header: () => <div className="flex justify-center">Address</div>,
+    cell: ({ row }) => (
+      <div className="capitalize flex justify-center">{row.getValue("CustomerAddress")}</div>
+    ),
+  },
+  {
+    accessorKey: "Type",
+    header: () => <div className="flex justify-center">Type</div>,
+    cell: ({ row }) => (
+      <div className="capitalize flex justify-center">{row.getValue("Type")}</div>
+    ),
+  },
+  {
     accessorKey: "Amount",
-    header: () => <div className="text-right mr-10">Amount</div>,
+    header: () => <div className="flex justify-center">Amount</div>,
     cell: ({ row }) => {
       const amount = parseFloat(row.getValue("Amount"))
 
@@ -420,18 +508,54 @@ export const columns: ColumnDef<Order>[] = [
         style: "currency",
         currency: "USD",
       }).format(amount)
-      return <div className="text-right font-medium mr-10">{formatted}</div>
+      return <div className="flex justify-center">{formatted}</div>
     },
   },
   {
     accessorKey: "createdAt",
-    header: () => <div className="ml-3">Date</div>,
+    header: () => <div className="flex justify-center">Date</div>,
     cell: ({ row }) => {
       const date = new Date(row.getValue("createdAt")).toLocaleDateString();
-      return <div className="capitalize">{date}</div>
+      return <div className="capitalize flex justify-center">{date}</div>
     },
   },
 ]
+
+/**
+ * TableSkeleton Component
+ * 
+ * Modern loading animation for tables using skeleton placeholders
+ */
+function TableSkeleton({ columns }: { columns: number }) {
+  return (
+    <div className="w-full">
+      <div className="overflow-hidden rounded-md border">
+        <Table>
+          <TableHeader>
+            <TableRow>
+              {Array.from({ length: columns }).map((_, i) => (
+                <TableHead key={i}>
+                  <Skeleton className="h-4 w-20" />
+                </TableHead>
+              ))}
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {Array.from({ length: 5 }).map((_, rowIndex) => (
+              <TableRow key={rowIndex}>
+                {Array.from({ length: columns }).map((_, colIndex) => (
+                  <TableCell key={colIndex}>
+                    <Skeleton className="h-4 w-full" />
+                  </TableCell>
+                ))}
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </div>
+    </div>
+  )
+}
 
 /**
  * DataTableDemo Component
@@ -448,11 +572,12 @@ export const columns: ColumnDef<Order>[] = [
  * - Data fetch အတွင်း loading state ကို show လုပ်သည်
  * - Data array ဗလာဖြစ်သောအခါ "No orders found" ကို display လုပ်သည်
  */
-export function OrderDataTable() {
+
+export function OrderDataTable({ orders }: { orders?: Order[] } = {}) {
   const navigate = useNavigate()
   const [data, setData] = React.useState<Order[]>([]);
   const [allData, setAllData] = React.useState<Order[]>([]);
-  const [loading, setLoading] = React.useState(true);
+  const [loading, setLoading] = React.useState(!orders);
   const [sorting, setSorting] = React.useState<SortingState>([])
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
     []
@@ -462,6 +587,14 @@ export function OrderDataTable() {
   const [rowSelection, setRowSelection] = React.useState({})
 
   React.useEffect(() => {
+    if (orders) {
+      // If orders are provided as props, use them directly
+      setData(orders);
+      setAllData(orders);
+      setLoading(false);
+      return;
+    }
+
     const fetchOrders = async () => {
       try {
         const orders = await getOrders();
@@ -555,7 +688,7 @@ export function OrderDataTable() {
   })
 
   if (loading) {
-    return <div className="p-4">Loading orders...</div>;
+    return <TableSkeleton columns={columns.length} />;
   }
 
   return (
@@ -638,10 +771,16 @@ export function OrderDataTable() {
  * - Data array ဗလာဖြစ်သောအခါ "No shippers found" ကို display လုပ်သည်
  */
 export function ShipperDataTable() {
+  const navigate = useNavigate()
   const [data, setData] = React.useState<Shipper[]>([]);
   const [allData, setAllData] = React.useState<Shipper[]>([]);
   const [loading, setLoading] = React.useState(true);
-  const [sorting, setSorting] = React.useState<SortingState>([])
+  const [sorting, setSorting] = React.useState<SortingState>([
+    {
+      id: "ShipperName",
+      desc: false,
+    },
+  ])
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
     []
   )
@@ -735,7 +874,7 @@ export function ShipperDataTable() {
   })
 
   if (loading) {
-    return <div className="p-4">Loading shippers...</div>;
+    return <TableSkeleton columns={shipperColumns.length} />;
   }
 
   return (
@@ -767,6 +906,11 @@ export function ShipperDataTable() {
                 <TableRow
                   key={row.id}
                   data-state={row.getIsSelected() && "selected"}
+                  className="cursor-pointer hover:bg-gray-50"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    navigate(`/Shipper/${row.original.ShipperId || row.original._id}`);
+                  }}
                 >
                   {row.getVisibleCells().map((cell) => (
                     <TableCell key={cell.id}>
