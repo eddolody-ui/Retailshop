@@ -138,37 +138,35 @@ export function OrderDetail() {
                 {/* Left column: customer & seller info (3/12) */}
                 <div className="col-span-12 md:col-span-3 border-r px-6 py-8">
                   <div className="mb-6">
-                    <div className="text-xs text-gray-400">Customer Name</div>
-                    <div className="mt-1 font-medium">{order.CustomerName || '—'}</div>
+                    <div className="text-ms text-gray-400">Customer Name</div>
+                    <div className="mt-1 font-medium ">{order.CustomerName || '—'}</div>
                   </div>
                   <div className="mb-6">
-                    <div className="text-xs text-gray-400">Customer Contact</div>
-                    <div className="mt-1 text-sm text-gray-700">{order.CustomerContact || '—'}</div>
+                    <div className="text-ms text-gray-400 ">Customer Contact</div>
+                    <div className="mt-1 text-sm text-black-700">{order.CustomerContact || '—'}</div>
                   </div>
                   <div className="mb-6">
-                    <div className="text-xs text-gray-400">Delivery Address</div>
+                    <div className="text-ms text-gray-400 ">Delivery Address</div>
                     <div className="mt-1 text-sm text-gray-700">{order.CustomerAddress || '—'}</div>
                   </div>
                   <div className="mt-6 pt-6 border-t">
-                    <div className="text-xs text-gray-400">Seller</div>
+                    <div className="text-ms text-gray-400 ">Shipper</div>
                     <div className="mt-1 text-sm">{(shipper as any).ShipperName || 'N/A'}</div>
-                    <div className="text-xs text-gray-400 mt-3">Seller Contact</div>
+                  </div>
+                  <div className="mt-4">
+                    <div className="text-ms text-gray-400 ">Shipper Contact</div>
                     <div className="text-sm">{(shipper as any).ShipperContact || '—'}</div>
                   </div>
                 </div>
 
                 {/* Middle column: tracking & status (6/12) */}
                 <div className="col-span-12 md:col-span-6 px-8 py-8">
-                  <div className="flex items-start justify-between">
-                    <div className="flex justify-end gap-130">
-                      <div className="font-semibold text-gray-800 mt-1.5">#{order.TrackingId}</div>
-                      <Button variant="ghost" className="rounded border">Update Status</Button>
+                  <div className="flex items-center mb-6 justify-between w-170">
+                    <div className="flex">
+                      <div className="font-semibold text-gray-800">Tracking ID #{order.TrackingId}</div>
                     </div>
-                    <div className="mt-2 flex flex-col gap-2 bg-gray-100 rounded-md">
-                    
-                    </div>
+                    <Button variant="ghost" className="rounded border ml-auto">Update Status</Button>
                   </div>
-
                   <div className="mt-6">
                     <div className="text-sm text-gray-400">your order is</div>
                     <div className="mt-2 text-4xl font-extrabold text-gray-900">{order.Status || 'Unknown'}</div>

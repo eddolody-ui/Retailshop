@@ -8,7 +8,8 @@
   import { CreateOrderForm } from "./features/home/pages/CreateOrder.tsx";
   import { Shipper } from "./features/home/pages/Shipper";
   import { CreateShipper } from "./features/home/pages/CreateShipper";
-import { OrderDetail } from "./features/home/pages/OrderDetail.tsx";
+  import { OrderDetail } from "./features/home/pages/OrderDetail.tsx";
+  import { ShipperDetail } from "./features/home/pages/ShipperDetail.tsx";
 
   const router =createBrowserRouter ([
     {path: '/',element:<HomePage/>},
@@ -16,7 +17,8 @@ import { OrderDetail } from "./features/home/pages/OrderDetail.tsx";
     {path:'/Order/CreateOrder',element:<CreateOrderForm/>},
     {path:'/Shipper',element:<Shipper/>},
     {path:'/Shipper/CreateShipper',element:<CreateShipper/>},
-    { path:"/Order/:trackingId", element:<OrderDetail />},
+    {path:"/Order/:trackingId", element:<OrderDetail />},
+    {path:"/Shipper/:shipperId", element:<ShipperDetail />},
   ])
   
   createRoot(document.getElementById("root")!).render(
