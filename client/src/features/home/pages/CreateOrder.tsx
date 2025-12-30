@@ -5,6 +5,7 @@ import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar"
 import { useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
 import { createOrder, getShippers, type ShipperData } from "@/api/serviceApi";
+import { useParams } from "react-router-dom"
 
 /**
  * CreateOrderForm Component
@@ -43,6 +44,28 @@ export function CreateOrderForm() {
     fetchShippers();
   }, []);
 
+  const { shipperId } = useParams();
+  // Form data state - holds all input values
+  const [formData, setFormData] = useState({
+    TrackingId: "",
+    CustomerName: "",
+    CustomerContact: "",
+    CustomerAddress: "",
+    Amount: 0,
+    Type: "COD",
+    Note: "",
+    Status: "Pending",
+    shipperId: shipperId || ""
+  });
+
+  useEffect(() => {
+    if (!shipperId) return;
+    setFormData((prev) => ({
+      ...prev,
+      shipperId,
+    }))
+  }, [shipperId])
+
   /**
    * handleSubmit Function
    * 
@@ -62,13 +85,18 @@ export function CreateOrderForm() {
     setLoading(true);
     setError(null);
     // Ensure Status is set to 'Pending' if not selected
+    if (!formData.shipperId) {
+      setError("shipperId is required. Cannot create order.");
+      setLoading(false);
+      return;
+    }
     const submitData = {
       ...formData,
       Status: formData.Status || 'Pending',
     };
     try {
       await createOrder(submitData);
-      navigate("/Order"); // ⬅️ redirect to order page 
+      navigate("/Shipper"); // ⬅️ redirect to order page 
     } catch (error: any) {
       setError(error?.response?.data?.message || "Error creating order");
       console.error("Error creating order:", error);
@@ -76,20 +104,6 @@ export function CreateOrderForm() {
       setLoading(false);
     }
   };
-
-  // Form data state - holds all input values
-  const [formData, setFormData] = useState({
-    TrackingId: "",
-    CustomerName: "",
-    CustomerContact: "",
-    CustomerAddress: "",
-    Amount: 0,
-    Type: "COD",
-    Note: "",
-    shipperId: "",
-    Status: "Pending",
-  });
-
   /**
    * handleChange Function
    * 
@@ -127,6 +141,7 @@ export function CreateOrderForm() {
                   </div>
                 )}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  {/* Tracking ID */}
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
                       Tracking ID                    
@@ -140,6 +155,7 @@ export function CreateOrderForm() {
                       required
                     />
                   </div>
+                  {/* Customer Name */}
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
                       Customer Name
@@ -153,7 +169,7 @@ export function CreateOrderForm() {
                       required
                     />
                   </div>
-
+                  {/* Customer Contact */}
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
                       Customer Contact
@@ -167,9 +183,10 @@ export function CreateOrderForm() {
                       required
                     />
                   </div>
+                  {/* Customer Address */}
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
-                        Customer Address
+                      Customer Address
                     </label>
                     <Input
                       onChange={handleChange}
@@ -180,6 +197,7 @@ export function CreateOrderForm() {
                       required
                     />
                   </div>
+                  {/* Amount */}
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2 ">
                       Amount
@@ -195,6 +213,7 @@ export function CreateOrderForm() {
                       min={0}
                     />
                   </div>
+                  {/* Type */}
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
                       Type
@@ -207,21 +226,7 @@ export function CreateOrderForm() {
                       </select>
                     </div>
                   </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Shipper
-                    </label>
-                    <div className="flex gap-2" >
-                      <select onChange={handleChange} value={formData.shipperId} className="rounded-lg focus:ring-2 focus:ring-blue-500 border border-gray-300 px-3 py-2 bg-white text-sm" name="shipperId">
-                        <option value="">Select Shipper (Optional)</option>
-                        {shippers.map((shipper) => (
-                          <option key={shipper._id || shipper.ShipperId} value={shipper._id}>
-                            {shipper.ShipperName} ({shipper.ShipperId})
-                          </option>
-                        ))}
-                      </select>
-                    </div>
-                  </div>
+                  {/* Note */}
                   <div className="md:col-span-2">
                     <label className="block text-sm font-medium text-gray-700 mb-2">
                       Note

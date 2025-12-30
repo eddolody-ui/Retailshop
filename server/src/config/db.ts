@@ -42,7 +42,7 @@ const OrderSchema = new mongoose.Schema(
     Amount: { type: Number, required: true },
     Type: { type: String, required: true },
     Note: { type: String },
-    shipperId: { type: mongoose.Schema.Types.ObjectId, ref: 'Shipper' },
+    shipperId: { type: mongoose.Schema.Types.Mixed, ref: 'Shipper', required: false },
     Status: { type: String, 
               enum: ["Pending", "Hub Inbound", "Arrive At Softing Hub", "In Route", "Delivered", "Return To Sender", "Cancelled"],
               default: "Pending" },

@@ -453,13 +453,9 @@ export const shipperColumns: ColumnDef<Shipper>[] = [
 export const columns: ColumnDef<Order>[] = [
     {
     accessorKey: "shipperId",
-    header: () => <div className="flex justify-center">Shipper</div>,
+    header: () => <div className="flex justify-center">Shipper ID</div>,
     cell: ({ row }) => {
-      const shipperId = row.getValue("shipperId") as any;
-      if (shipperId && typeof shipperId === 'object' && shipperId.ShipperName) {
-        return <div className="capitalize flex justify-center">{shipperId.ShipperName}</div>
-      }
-      return <div className="text-gray-500">Not assigned</div>
+        return <div className="capitalize flex justify-center">{row.getValue("shipperId")}</div>
     },
   },
   {
@@ -616,16 +612,22 @@ export function OrderDataTable({ orders }: { orders?: Order[] } = {}) {
 
         const merged = (orders as Order[]).map((o) => {
           const copy = { ...o } as any
-          // if shipperId is string, try to map to shipper
-          if (copy.shipperId && typeof copy.shipperId === 'string') {
-            const s = shipperById.get(copy.shipperId)
-            if (s) copy.shipper = s
-          } else if (copy.shipperId && typeof copy.shipperId === 'object') {
-            copy.shipper = copy.shipperId
+          // Always assign shipper object if possible
+          let shipper = undefined;
+          // Try to match by string, ObjectId, or nested object
+          if (copy.shipperId) {
+            // Try direct string match
+            shipper = shipperById.get(copy.shipperId.toString());
+            // If not found and shipperId is object, try _id and ShipperId
+            if (!shipper && typeof copy.shipperId === 'object') {
+              if (copy.shipperId._id) shipper = shipperById.get(copy.shipperId._id.toString());
+              if (!shipper && copy.shipperId.ShipperId) shipper = shipperById.get(copy.shipperId.ShipperId.toString());
+            }
           }
+          copy.shipper = shipper;
           // expose shipperName and shipperIdentifier for easy search
-          copy.shipperName = (copy.shipper && (copy.shipper.ShipperName || copy.shipper.ShipperName)) || ''
-          copy.shipperIdentifier = (copy.shipper && ((copy.shipper.ShipperId) || (copy.shipper._id))) || ''
+          copy.shipperName = (shipper && (shipper.ShipperName)) || '';
+          copy.shipperIdentifier = (shipper && (shipper.ShipperId || shipper._id)) || '';
           return copy as Order
         })
 
@@ -633,6 +635,8 @@ export function OrderDataTable({ orders }: { orders?: Order[] } = {}) {
         setAllData(merged as Order[]);
       } catch (error) {
         console.error("Failed to fetch orders:", error);
+        setData([]);
+        setAllData([]);
       } finally {
         setLoading(false);
       }
