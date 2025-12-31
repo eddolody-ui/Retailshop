@@ -1,8 +1,37 @@
 import { Router } from "express";
-import { saveOrder } from "./config/db";
-import { Order } from "./config/db";
-
+import { saveOrder, Order } from "./config/db";
+/**
+ * PATCH /:trackingId/status - Update Order Status and Log
+ *
+ * Updates the status of an order and appends a log entry.
+ *
+ * Relationships:
+ * - Called from frontend when status is changed
+ * - Updates order status and pushes log entry
+ */
 const router = Router();
+router.patch('/:trackingId/status', async (req, res) => {
+  try {
+    const { status, message, createdBy } = req.body;
+    const order = await Order.findOne({ TrackingId: req.params.trackingId });
+    if (!order) {
+      return res.status(404).json({ message: 'Order not found' });
+    }
+    order.Status = status;
+    order.log = order.log || [];
+    order.log.push({
+      status,
+      message: message || `Status changed to ${status}`,
+      timestamp: new Date(),
+      createdBy: createdBy || 'system',
+    });
+    await order.save();
+    res.json(order);
+  } catch (error) {
+    console.error('Order status update error:', error);
+    res.status(500).json({ message: 'Failed to update status', error });
+  }
+});
 
 /**
  * POST / - Create Order Route

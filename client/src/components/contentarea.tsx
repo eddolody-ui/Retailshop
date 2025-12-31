@@ -5,6 +5,8 @@ import { FiShoppingCart } from "react-icons/fi";
 import { CgTrending } from "react-icons/cg";
 import { Users, Lock, Settings } from "lucide-react"
 import { IoCarSport } from "react-icons/io5";
+import { MdOutlineRoute } from "react-icons/md";
+import { IoIosContacts } from "react-icons/io";
 //Sidebar import //
 import {
   Sidebar,
@@ -50,13 +52,21 @@ const items: MenuItem[] = [
   },
 
  { title: "Shipper",
-   icon: Settings,
+   icon: IoIosContacts,
    children: [
      { title: "Shipper", url: "/Shipper", icon: Users },
      { title: "CreateShipper", url: "/Shipper/CreateShipper", icon: Lock },
    ],
  },
+ { title: "Route",
+  icon: MdOutlineRoute,
+  children: [
+    { title: "Route", url: "/Route", icon: Users },
+    { title: "CreateRoute", url: "/Route/CreateRoute", icon: Lock },
+  ],
+},
 ]
+
 //Section-For-Sidebar//
 
 export function AppSidebar() {

@@ -136,7 +136,7 @@ export function ShipperDetail() {
         <SidebarInset className="flex flex-col w-full">
           <TopNavbar />
             {/* Back Button */}
-            <div className="p-2 mt-3 flex justify-between items-center">
+            <div className="pl-2 pr-4 mt-3 flex justify-between items-center">
               <Link to="/Shipper">
                 <Button variant="outline">
                   <ArrowLeft className="mr-2 h-4 w-4" />
@@ -144,7 +144,7 @@ export function ShipperDetail() {
                 </Button>
               </Link>
               <Link to={`/Shipper/${shipperId}/CreateOrder`}>
-                <Button>
+                <Button className="bg-blue-700">
                   Create Order
                 </Button>
               </Link>

@@ -114,8 +114,7 @@ const handleSubmit = async (e: React.FormEvent) => {
                       onChange={handleChange}
                       name="PickUpAddress"
                       placeholder="Enter PickUp Address"
-                      className="rounded-lg focus:ring-2 focus:ring-blue-500"
-                    />
+                      className="rounded-lg focus:ring-2 focus:ring-blue-500"/>
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -141,10 +140,10 @@ const handleSubmit = async (e: React.FormEvent) => {
                       className="rounded-lg focus:ring-2 focus:ring-blue-500"/>
                   </div>
                 </div>
-              </div>
-                <Button  type="submit" disabled={loading} className="px-6 py-2 rounded-lg ml-205 bg-blue-600 hover:bg-blue-500 text-white">
+                <Button  type="submit" disabled={loading} className="sticky px-5 py-2 mt-8 rounded-lg bg-gray-600 hover:bg-gray-500 text-white">
                   {loading ? "Creating..." : "Create Shipper"}
                 </Button>
+              </div>
             </form>
           </div>
       </SidebarInset>

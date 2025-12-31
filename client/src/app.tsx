@@ -8,6 +8,7 @@ import { CreateShipper } from "./features/home/pages/CreateShipper";
 import { ShipperDetail } from "./features/home/pages/ShipperDetail";
 import { Component } from "react";
 import type { ErrorInfo, ReactNode } from "react";
+import { Toaster } from "sonner";
 
 class ErrorBoundary extends Component<{children: ReactNode}, {hasError: boolean, error?: Error}> {
   constructor(props: {children: ReactNode}) {
@@ -72,20 +73,23 @@ function App() {
   return (
     <ErrorBoundary>
       <BrowserRouter>
-          <Routes>
-              <Route path="/" element={<HomePage />} />
-              <Route path="/Order" element={<Order />} />
-              <Route path="/Order/CreateOrder" element={<CreateOrderForm />}/>
-              <Route path="/Order/:trackingId" element={<OrderDetail />} />
-              <Route path="/Shipper" element={<Shipper/>}/>
-              <Route path="/Shipper/CreateShipper" element={<CreateShipper/>}/>
-              <Route path="/Shipper/:shipperId" element={<ShipperDetail />} />
-              <Route path="/Shipper/:shipperId/CreateOrder" element={<CreateOrderForm />} />
-          </Routes>
+        <Routes>
+          <Route path="/" element={<HomePage />} />
+          <Route path="/Order" element={<Order />} />
+          <Route path="/Order/CreateOrder" element={<CreateOrderForm />} />
+          <Route path="/Order/:trackingId" element={<OrderDetail />} />
+          <Route path="/Shipper" element={<Shipper />} />
+          <Route path="/Shipper/CreateShipper" element={<CreateShipper />} />
+          <Route path="/Shipper/:shipperId" element={<ShipperDetail />} />
+          <Route
+            path="/Shipper/:shipperId/CreateOrder"
+            element={<CreateOrderForm />}
+          />
+        </Routes>
+        <Toaster richColors />
       </BrowserRouter>
     </ErrorBoundary>
   );
 }
 
 export default App;
-

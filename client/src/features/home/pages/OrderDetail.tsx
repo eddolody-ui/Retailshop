@@ -1,10 +1,14 @@
 import { SidebarProvider, SidebarInset } from "@/components/ui/sidebar"
-import { AppSidebar, TopNavbar } from "@/components/contentarea"
+import { AppSidebar } from "@/components/contentarea"
 import { Button } from "@/components/ui/button"
 import { ArrowLeft } from "lucide-react"
 import { Link, useParams } from "react-router-dom"
 import { useEffect, useState } from "react"
-import { getOrder, getShipper, type OrderData, type ShipperData } from "@/api/serviceApi"
+import { getOrder, getShipper, updateOrderStatus, type OrderData, type ShipperData } from "@/api/serviceApi"
+import { ScrollArea } from "@/components/ui/scroll-area"
+import { Separator } from "@/components/ui/separator"
+import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue} from "@/components/ui/select"
+
 
 export function OrderDetail() {
   const { trackingId } = useParams<{ trackingId: string }>()
@@ -12,6 +16,40 @@ export function OrderDetail() {
   const [shipper, setShipper] = useState<(ShipperData & { _id: string }) | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const isCancelled = order?.Status === "Cancelled"
+  const statusBgColor = order?.Status === "Cancelled" ? "bg-white-100" : order?.Status === "Delivered" ? "bg-white-100" :"bg-white"
+
+  // Modal and status update state
+  const [showModal, setShowModal] = useState(false);
+  const [newStatus, setNewStatus] = useState("");
+  const [statusLoading, setStatusLoading] = useState(false);
+  const [statusError, setStatusError] = useState<string | null>(null);
+  const [changeReason, setChangeReason] = useState("");
+
+  // Update newStatus when modal opens
+  const openStatusModal = () => {
+    setNewStatus(order?.Status || "");
+    setShowModal(true);
+  };
+
+  const handleStatusUpdate = async () => {
+    if (!order || !newStatus) return;
+    setStatusLoading(true);
+    setStatusError(null);
+    try {
+      const message = changeReason.trim() ? changeReason : `Status changed to ${newStatus}`;
+      await updateOrderStatus(order.TrackingId, newStatus, message, "user");
+      // Refresh order data
+      const updatedOrder = await getOrder(order.TrackingId);
+      setOrder(updatedOrder);
+      setShowModal(false);
+      setChangeReason("");
+    } catch (err: any) {
+      setStatusError("Failed to update status");
+    } finally {
+      setStatusLoading(false);
+    }
+  };
 
   useEffect(() => {
     const fetchOrder = async () => {
@@ -63,7 +101,6 @@ export function OrderDetail() {
         <div className="flex min-h-screen w-full">
           <AppSidebar />
           <SidebarInset className="flex flex-col w-full">
-            <TopNavbar />
             <div className="flex-1 flex items-center justify-center">
               <div className="text-center">
                 <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-900 mx-auto"></div>
@@ -82,7 +119,6 @@ export function OrderDetail() {
         <div className="flex min-h-screen w-full">
           <AppSidebar />
           <SidebarInset className="flex flex-col w-full">
-            <TopNavbar />
             <div className="flex-1 flex items-center justify-center">
               <div className="text-center">
                 <div className="text-red-600 mb-4 text-lg">{error}</div>
@@ -106,7 +142,6 @@ export function OrderDetail() {
         <div className="flex min-h-screen w-full">
           <AppSidebar />
           <SidebarInset className="flex flex-col w-full">
-            <TopNavbar />
             <div className="flex-1 flex items-center justify-center">
               <div className="text-center">
                 <p className="text-gray-600 mb-4">Order not found</p>
@@ -129,10 +164,10 @@ export function OrderDetail() {
       <div className="flex min-h-screen w-full">
         <AppSidebar />
         <SidebarInset className="flex flex-col w-full">
-          <TopNavbar />
 
           {/* Centered card matching mock: left info | center status + timeline | right actions */}
-          <div className="flex-1">
+          <div className={`p-6 rounded-lg shadow ${
+            statusBgColor}`} >
             <div className="max-w-5xl mx-auto overflow-hidden">
               <div className="grid grid-cols-12">
                 {/* Left column: customer & seller info (3/12) */}
@@ -144,6 +179,10 @@ export function OrderDetail() {
                   <div className="mb-6">
                     <div className="text-ms text-gray-400 ">Customer Contact</div>
                     <div className="mt-1 text-sm text-black-700">{order.CustomerContact || '—'}</div>
+                  </div>
+                  <div className="mb-6">
+                    <div className="text-ms text-gray-400 ">Amount</div>
+                    <div className="mt-1 text-sm text-gray-700">{order.Amount || '—'}</div>
                   </div>
                   <div className="mb-6">
                     <div className="text-ms text-gray-400 ">Delivery Address</div>
@@ -165,7 +204,67 @@ export function OrderDetail() {
                     <div className="flex">
                       <div className="font-semibold text-gray-800">Tracking ID #{order.TrackingId}</div>
                     </div>
-                    <Button variant="ghost" className="rounded border ml-auto">Update Status</Button>
+                    <Button variant="ghost" className="rounded border-b ml-auto transform motion-safe:hover:scale-110" onClick={openStatusModal}>Update Status</Button>
+                            {/* Status Update Modal */}
+                            {showModal && (
+                              <div className="fixed inset-0 z-50 flex items-center justify-center bg-gray bg-opacity-30 backdrop-blur-sm">
+                                <div className="bg-white rounded-xl shadow-xl w-full max-w-md p-8 relative animate-fade-in">
+                                  <button
+                                    className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 text-xl font-bold"
+                                    onClick={() => setShowModal(false)}
+                                    aria-label="Close"
+                                    disabled={statusLoading || isCancelled }                                  >
+                                    ×
+                                  </button>
+                                  <h2 className="text-2xl font-bold mb-6 text-gray-900">Update Order Status</h2>
+                                  <div className="mb-6">
+                                    <label htmlFor="status-select" className="block text-sm font-medium text-gray-700 mb-2">Select new status</label>
+                                    <Select
+                                        value={newStatus}
+                                        onValueChange={(value) => setNewStatus(value)}
+                                        disabled={statusLoading || order?.Status === "Cancelled"} // disable if cancelled
+                                      >
+                                        <SelectTrigger className="w-full min-h-[44px] text-gray-800 font-semibold shadow-sm">
+                                          <SelectValue placeholder="Select status" />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                          <SelectItem value="Pending">Pending</SelectItem>
+                                          <SelectItem value="Hub Inbound">Hub Inbound</SelectItem>
+                                          <SelectItem value="Arrive At Softing Hub">Arrive At Softing Hub</SelectItem>
+                                          <SelectItem value="In Route">In Route</SelectItem>
+                                          <SelectItem value="Delivered">Delivered</SelectItem>
+                                          <SelectItem value="Return To Sender">Return To Sender</SelectItem>
+                                          <SelectItem value="Cancelled">Cancelled</SelectItem>
+                                        </SelectContent>
+                                      </Select>
+                                  </div>
+                                  {statusError && <div className="text-red-600 mb-4 text-sm">{statusError}</div>}
+                                  <textarea
+                                    className="w-full border border-gray-300 rounded-lg px-4 py-2 mb-6 focus:outline-none focus:ring-2 focus:ring-blue-500 hover:border-blue-400 hover:bg-blue-50"
+                                    rows={3}
+                                    placeholder="Changed Reason"
+                                    value={changeReason}
+                                    onChange={e => setChangeReason(e.target.value)}
+                                    disabled={statusLoading}
+                                  />
+                                  <div className="flex gap-3 justify-end">
+                                    <Button
+                                      onClick={handleStatusUpdate}
+                                      disabled={statusLoading || !newStatus}                                    >
+                                      {statusLoading ? "Updating..." : "Update"}
+                                    </Button>
+                                    <Button
+                                      variant="outline"
+                                      onClick={() => setShowModal(false)}
+                                      disabled={statusLoading}
+                                      className="px-6 py-2 font-semibold rounded-lg border-gray-300"
+                                    >
+                                      Cancel
+                                    </Button>
+                                  </div>
+                                </div>
+                              </div>
+                            )}
                   </div>
                   <div className="mt-6">
                     <div className="text-sm text-gray-400">your order is</div>
@@ -174,31 +273,31 @@ export function OrderDetail() {
                     <div className="mt-2 text-xs text-gray-400">Last updated on {order.updatedAt ? new Date(order.updatedAt).toLocaleDateString() : '—'}</div>
                   </div>
 
-                  {/* Tracking History / Timeline */}
+                  {/* Tracking History / Timeline */}    
                   <div className="mt-8">
                     <div className="text-sm font-medium mb-4">Tracking History</div>
-                    <div className="relative">
-                      {/* vertical line */}
-                      <div className="absolute left-6 top-0 bottom-0 w-px bg-gray-200"></div>
-                      <ul className="space-y-6 pl-12">
-                        {(() => {
-                          const logs = (order as any).Logs || (order as any).logs || []
-                          if (!logs || logs.length === 0) {
-                            return <li className="text-sm text-gray-500">No tracking events available.</li>
-                          }
-                          return (logs.slice().reverse().map((entry: any, idx: number) => (
-                            <li key={idx} className="relative">
-                              <div className="absolute -left-9 top-0 h-3 w-3 rounded-full bg-white border-2 border-blue-600"></div>
-                              <div className="text-sm font-medium">{entry.message || entry.event || 'Event'}</div>
-                              <div className="text-xs text-gray-400 mt-1">{entry.timestamp ? new Date(entry.timestamp).toLocaleString() : (entry.time ? new Date(entry.time).toLocaleString() : '')}</div>
-                            </li>
-                            
-                          )))
-                        })()}
-                      </ul>
-                    </div>
+                      <ScrollArea className="h-64 rounded-md border-l p-4">
+                        <ul className="space-y-4">
+                          {order?.log && order.log.length > 0 ? (
+                            order.log.slice().reverse().map((entry, idx) => (
+                              <li key={idx} className="relative">
+                                <div className="text-sm font-medium">{entry.status || 'Event'}</div>
+                                <div className="text-xs text-gray-400 mt-1 flex items-center gap-2">
+                                  {entry.timestamp ? new Date(entry.timestamp).toLocaleString() : ''}
+                                  {entry.message && (
+                                    <span className="ml-2 text-blue-500 font-medium">{entry.message}</span>
+                                  )}
+                                </div>
+                                <Separator className="my-2" />
+                              </li>
+                            ))
+                          ) : (
+                            <li className="text-sm text-gray-500">No tracking events available.</li>
+                          )}
+                        </ul>
+                      </ScrollArea>
+                    </div>            
                   </div>
-                </div>
               </div>
             </div>
           </div>

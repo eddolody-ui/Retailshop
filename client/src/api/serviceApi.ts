@@ -1,3 +1,25 @@
+/**
+ * updateOrderStatus Function
+ *
+ * Updates the status of an order and appends a log entry.
+ *
+ * Relationships:
+ * - Called from OrderDetail page when status is changed
+ * - PATCH /api/orders/:trackingId/status endpoint
+ */
+export const updateOrderStatus = async (
+  trackingId: string,
+  status: string,
+  message?: string,
+  createdBy?: string
+) => {
+  const res = await api.patch(`/orders/${trackingId}/status`, {
+    status,
+    message,
+    createdBy,
+  });
+  return res.data;
+};
 import api from "./axois";
 
 /**
@@ -22,6 +44,19 @@ export interface OrderData {
   Note: string;
   shipperId?: string | ShipperData;
   Status: string | 'Pending' | 'In Transit' | 'Delivered' | 'Cancelled';
+  log?: {
+    status: string;
+    timestamp: string;
+    message?: string;
+    createdBy?: string;
+  }[];
+}
+
+export interface OrderLog {
+  status: string
+  message?: string
+  createdAt: string
+  createdBy?: string
 }
 
 /**

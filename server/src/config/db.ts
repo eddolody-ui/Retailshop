@@ -1,5 +1,6 @@
 import mongoose from "mongoose";
 import { ENV_VARS } from "./envVars";
+import { create } from "node:domain";
 
 /* =======================
    MongoDB Connection
@@ -46,6 +47,15 @@ const OrderSchema = new mongoose.Schema(
     Status: { type: String, 
               enum: ["Pending", "Hub Inbound", "Arrive At Softing Hub", "In Route", "Delivered", "Return To Sender", "Cancelled"],
               default: "Pending" },
+    log: [
+      {
+        status: { type: String },
+        timestamp: { type: Date, default: Date.now },
+        createdAt: { type: Date, default: Date.now },
+        createdBy: { type: String },
+        message: { type: String }
+      }
+    ]
   },
   { timestamps: true }
 );
@@ -66,8 +76,7 @@ const OrderSchema = new mongoose.Schema(
  * - Router.get("/:trackingId") မှ individual orders ကို fetch လုပ်ရန် queried ဖြစ်သည်
  */
 
-const Order =
-  mongoose.models.Order || mongoose.model("Order", OrderSchema);
+const Order = mongoose.models.Order || mongoose.model("Order", OrderSchema);
 
 /* =======================
    Save Order
@@ -86,6 +95,14 @@ const Order =
  */
 const saveOrder = async (orderData: any) => {
   try {
+    // Add initial log entry for order creation
+    if (!orderData.log) orderData.log = [];
+    orderData.log.push({
+      status: orderData.Status || "Pending",
+      message: "Order created",
+      timestamp: new Date(),
+      createdBy: orderData.createdBy || "system"
+    });
     const order = new Order(orderData);
     return await order.save();
   } catch (error) {
