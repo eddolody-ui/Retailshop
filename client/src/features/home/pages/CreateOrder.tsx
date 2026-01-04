@@ -18,7 +18,7 @@ export function CreateOrderForm() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const [shippers, setShippers] = useState<(ShipperData & { _id: string })[]>([]);
+  const [, setShippers] = useState<(ShipperData & { _id: string })[]>([]);
 
   // Form data state
   const [formData, setFormData] = useState({
