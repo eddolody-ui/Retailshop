@@ -1,6 +1,7 @@
 import mongoose from "mongoose";
 import { ENV_VARS } from "./envVars";
 import { create } from "node:domain";
+import { Route } from "react-router-dom";
 
 /* =======================
    MongoDB Connection
@@ -77,7 +78,6 @@ const OrderSchema = new mongoose.Schema(
  */
 
 const Order = mongoose.models.Order || mongoose.model("Order", OrderSchema);
-
 /* =======================
    Save Order
 ======================= */
@@ -110,9 +110,9 @@ const saveOrder = async (orderData: any) => {
     throw error;
   }
 };
-
 export { Order, saveOrder };
 
+//section for Shipper schema and model
 const ShipperSchema = new mongoose.Schema({
     ShipperId: { type: String, required: true },
     ShipperName: { type: String, required: true },
@@ -123,8 +123,7 @@ const ShipperSchema = new mongoose.Schema({
     Note: { type: String },
 }, { timestamps: true });
 
-const Shipper =
-  mongoose.models.Shipper || mongoose.model("Shipper", ShipperSchema);
+const Shipper = mongoose.models.Shipper || mongoose.model("Shipper", ShipperSchema);
 
 const saveShipper = async (shipperData: any) => {
   try {
@@ -135,5 +134,51 @@ const saveShipper = async (shipperData: any) => {
     throw error;
   } 
 };
-
 export { Shipper, saveShipper };
+
+
+//section for DeliRoute schema and model
+const RouteSchema = new mongoose.Schema({
+    routeId: { type: String, required: true, unique: true },
+    Hub: { type: String, required: true },
+    AssignPersonName: { type: String, required: true },
+    DateCreated: { type: Date, default: Date.now },
+  }, { timestamps: true });
+
+const DeliRoute = mongoose.models.DeliRoute || mongoose.model("DeliRoute", RouteSchema);
+
+const saveDeliRoute = async (routeData: any) => {
+  try {
+    const route = new DeliRoute(routeData); 
+    return await route.save();
+  } catch (error) {
+    console.error("❌ Route save error:", error);
+    throw error;
+  } 
+};
+
+export { DeliRoute, saveDeliRoute };
+
+//section for shipment schema and model
+const ShipmentSchema = new mongoose.Schema({
+    RouteId: { type: String, required: true, unique: true },
+    Hub: { type: String, required: true },
+    AssignPersonName: { type: String, required: true },
+    TotalPercel: { type: Number, required: true },
+    DateCreated: { type: Date, default: Date.now },
+  }, { timestamps: true });
+
+const Shipment = mongoose.models.Shipment || mongoose.model("Shipment", ShipmentSchema);
+
+const saveShipment = async (shipmentData: any) => {
+  try {
+    const shipment = new Shipment(shipmentData); 
+    return await shipment.save();
+  } catch (error) {
+    console.error("❌ Shipment save error:", error);
+    throw error;
+  } 
+};
+
+export { Shipment, saveShipment };
+

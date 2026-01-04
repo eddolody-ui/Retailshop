@@ -1,6 +1,6 @@
 import { SidebarProvider, SidebarInset } from "@/components/ui/sidebar"
 import { AppSidebar, TopNavbar } from "@/components/contentarea"
-import { ShipperDataTable } from "@/components/contentarea"
+import { ShipperDataTable } from "@/components/DataTable"
 export function Shipper() {
   return (
     <SidebarProvider>

@@ -1,9 +1,20 @@
-//Icon Import//
+/**
+ * File: contentarea.tsx
+ * ရည်ရွယ်ချက်
+ * - Dashboard layout အတွက် Sidebar, TopNavbar, Dashboard cards, နဲ့
+ *   Top-nav search လုပ်ငန်းစဉ်တို့ကို ထည့်ထားသည်။
+ * - ပိုမိုသေးငယ်တဲ့ UI helper components (AppSidebar, TopNavbar, TopNavSearch,
+ *   Dashboard, EachShipperData) များပါဝင်သည်။
+ * - DataTable လုပ်ငန်းများကို `DataTable.tsx` သို့ ခွဲထုတ်ထားပြီး ဒီ file မှ
+ *   အဲဒီ components များကို import ပြုလုပ်၍ အသုံးပြုသည်။
+ */
+
+// Icon imports
 import { FiAirplay } from "react-icons/fi";
 import { StatusCard } from "@/components/ui/card"
 import { FiShoppingCart } from "react-icons/fi";
 import { CgTrending } from "react-icons/cg";
-import { Users, Lock, Settings } from "lucide-react"
+import { Users, Lock } from "lucide-react"
 import { IoCarSport } from "react-icons/io5";
 import { MdOutlineRoute } from "react-icons/md";
 import { IoIosContacts } from "react-icons/io";
@@ -59,12 +70,9 @@ const items: MenuItem[] = [
    ],
  },
  { title: "Route",
+   url: "/Route",
   icon: MdOutlineRoute,
-  children: [
-    { title: "Route", url: "/Route", icon: Users },
-    { title: "CreateRoute", url: "/Route/CreateRoute", icon: Lock },
-  ],
-},
+ },
 ]
 
 //Section-For-Sidebar//
@@ -72,6 +80,10 @@ const items: MenuItem[] = [
 export function AppSidebar() {
   // state to control which dropdowns are open
   const [openDropdowns, setOpenDropdowns] = React.useState<Record<string, boolean>>({})
+
+  // Note: `AppSidebar` ပြင်ပမှာ မလိုအပ်သော logic များကို မထည့်ဖို့ ရည်ရွယ်ထားပါသည် —
+  // sidebar items တွေကို `items` constant မှ တိုက်ရိုက် ဖော်ပြပြီး၊ dropdown state ကို
+  // local state ဖြင့် ထိန်းချုပ်သည်။
 
   const toggleDropdown = (title: string) => {
     setOpenDropdowns((prev) => ({
@@ -81,8 +93,8 @@ export function AppSidebar() {
   }
 
   return (
-    <Sidebar collapsible="icon">
-    <SidebarHeader className="flex-row items-center justify-between p-4">
+    <Sidebar collapsible="icon" className="h-screen sticky top-0 left-0 overflow-x-hidden">
+    <SidebarHeader className="flex-row items-center justify-between p-4 sticky top-0 bg-white z-10">
     {/* Title */}
     <span className="group-data-[collapsible=icon]:hidden font-semibold ml-  ">
       SHOPIFY
@@ -91,7 +103,7 @@ export function AppSidebar() {
     <SidebarTrigger className="w-5 h-5"/>
 
   </SidebarHeader>
-      <SidebarContent >
+      <SidebarContent className="overflow-y-auto h-[calc(100vh-56px)] overflow-x-hidden bg-white">
         <SidebarMenu className="text-sm ml-2 m-2">
           {items.map((item) => (
             <SidebarMenuItem key={item.title} >
@@ -100,7 +112,7 @@ export function AppSidebar() {
               <SidebarMenuButton asChild>
                 {item.children ? (
                   <button
-                    className="flex items-center gap-2 w-full"
+                    className="flex items-center gap-2 w-4"
                     onClick={() => toggleDropdown(item.title)}
                   >
                     <TooltipProvider>
@@ -170,13 +182,14 @@ export function AppSidebar() {
     </Sidebar>
   )
 }
+
 //Section-For-TopNavBar//
 export function TopNavbar() {
   const location = useLocation()
   const paths = location.pathname.split("/").filter(Boolean)
   // useSearchParams is used by the TopNavSearch component below
   return (
-    <header className="h-14 border-b flex items-center px-4 bg-background w-full">
+    <header className="h-14 border-b flex items-center px-4 bg-white w-full">
       {/* LEFT */}
       <div className="flex items-center flex-1 gap-4">
         {paths.length > 0 && (
@@ -243,8 +256,8 @@ export function TopNavbar() {
   )
 }
 
-
 //Section-For-DashboardCards//
+// Dashboard cards component: small summary cards that fetch aggregate order stats
 export default function Dashboard() {
   const [pendingCount, setPendingCount] = useState<number>(0);
   const [totalOrders, setTotalOrders] = useState<number>(0);
@@ -371,6 +384,10 @@ export  function EachShipperData({ shipperId }: { shipperId?: string } = {}) {
 
 //Section-For-DataTable//
 import * as React from "react"
+//Section-For-DataTable//
+// `OrderDataTable` နှင့် `ShipperDataTable` ကို ဒီနေရာ import လုပ်ထားသည်။
+// အဓိက table logic, columns နှင့် data fetching logic များကို `DataTable.tsx` မှာ ထည့်ထားပြီး
+// ဒီ file မှာ အဲဒီ components ကို layout (pages) အတွင်း သုံးရန်သာ import လုပ်ထားသည်။
 import {
   flexRender,
   getCoreRowModel,
@@ -563,227 +580,6 @@ function TableSkeleton({ columns }: { columns: number }) {
   )
 }
 
-/**
- * DataTableDemo Component
- * 
- * Order data ကို sortable၊ filterable table တွင် search functionality ဖြင့် display လုပ်သည်။
- * Backend API မှ order data ကို fetch လုပ်ပြီး TanStack Table ကို အသုံးပြု၍ render လုပ်သည်။
- * 
- * Relationships:
- * - Order list ကို display လုပ်ရန် Order page component မှ အသုံးပြုသည်
- * - Backend မှ data fetch လုပ်ရန် getOrders() API function ကို call လုပ်သည်
- * - MongoDB fields များဖြင့် OrderData ကို extend လုပ်သော Order type ကို အသုံးပြုသည်
- * - GET /api/orders endpoint မှ data ကို render လုပ်သည်
- * - TrackingId ဖြင့် search functionality ကို provide လုပ်သည်
- * - Data fetch အတွင်း loading state ကို show လုပ်သည်
- * - Data array ဗလာဖြစ်သောအခါ "No orders found" ကို display လုပ်သည်
- */
-
-export function OrderDataTable({ orders }: { orders?: Order[] } = {}) {
-  const navigate = useNavigate()
-  const [data, setData] = React.useState<Order[]>([]);
-  const [allData, setAllData] = React.useState<Order[]>([]);
-  const [loading, setLoading] = React.useState(!orders);
-  const [sorting, setSorting] = React.useState<SortingState>([])
-  const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
-    []
-  )
-  const [columnVisibility, setColumnVisibility] =
-    React.useState<VisibilityState>({})
-  const [rowSelection, setRowSelection] = React.useState({})
-
-  React.useEffect(() => {
-    if (orders) {
-      // If orders are provided as props, use them directly
-      setData(orders);
-      setAllData(orders);
-      setLoading(false);
-      return;
-    }
-
-    const fetchOrders = async () => {
-      try {
-        const orders = await getOrders();
-        // fetch shippers and build map to merge shipper info into orders
-        let shippers: Shipper[] = []
-        try {
-          shippers = await getShippers() as Shipper[]
-        } catch (err) {
-          // if shippers endpoint fails, continue with orders only
-          console.warn('Failed to fetch shippers for merge:', err)
-        }
-
-        const shipperById = new Map<string, Shipper>()
-        for (const s of shippers) {
-          // support both ShipperId and _id keys
-          if ((s as any).ShipperId) shipperById.set((s as any).ShipperId.toString(), s)
-          if (s._id) shipperById.set(s._id.toString(), s)
-        }
-
-        const merged = (orders as Order[]).map((o) => {
-          const copy = { ...o } as any
-          // Always assign shipper object if possible
-          let shipper = undefined;
-          // Try to match by string, ObjectId, or nested object
-          if (copy.shipperId) {
-            // Try direct string match
-            shipper = shipperById.get(copy.shipperId.toString());
-            // If not found and shipperId is object, try _id and ShipperId
-            if (!shipper && typeof copy.shipperId === 'object') {
-              if (copy.shipperId._id) shipper = shipperById.get(copy.shipperId._id.toString());
-              if (!shipper && copy.shipperId.ShipperId) shipper = shipperById.get(copy.shipperId.ShipperId.toString());
-            }
-          }
-          copy.shipper = shipper;
-          // expose shipperName and shipperIdentifier for easy search
-          copy.shipperName = (shipper && (shipper.ShipperName)) || '';
-          copy.shipperIdentifier = (shipper && (shipper.ShipperId || shipper._id)) || '';
-          return copy as Order
-        })
-
-        setData(merged as Order[]);
-        setAllData(merged as Order[]);
-      } catch (error) {
-        console.error("Failed to fetch orders:", error);
-        setData([]);
-        setAllData([]);
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchOrders();
-  }, []);
-
-  // read query param `q` from URL and filter client-side
-  const [searchParams] = useSearchParams();
-  React.useEffect(() => {
-    const q = (searchParams.get('q') || '').trim().toLowerCase()
-    if (!q) {
-      setData(allData)
-      return
-    }
-
-    const filtered = allData.filter((o) => {
-      const tracking = (o.TrackingId || '').toString().toLowerCase()
-      const orderId = (o._id || '').toString().toLowerCase()
-      const customer = (o.CustomerName || '').toString().toLowerCase()
-      const shipperName = (((o as any).shipperName) || ((o as any).shipper && ((o as any).shipper.ShipperName || ''))) .toString().toLowerCase()
-      const shipperId = (((o as any).shipperIdentifier) || ((o as any).shipper && ((o as any).shipper.ShipperId || (o as any).shipper._id) || '')).toString().toLowerCase()
-
-      return (
-        tracking.includes(q) ||
-        orderId.includes(q) ||
-        customer.includes(q) ||
-        shipperName.includes(q) ||
-        shipperId.includes(q)
-      )
-    })
-
-    setData(filtered)
-  }, [searchParams, allData])
-
-  const table = useReactTable({
-    data,
-    columns,
-    onSortingChange: setSorting,
-    onColumnFiltersChange: setColumnFilters,
-    getCoreRowModel: getCoreRowModel(),
-    getPaginationRowModel: getPaginationRowModel(),
-    getSortedRowModel: getSortedRowModel(),
-    getFilteredRowModel: getFilteredRowModel(),
-    onColumnVisibilityChange: setColumnVisibility,
-    onRowSelectionChange: setRowSelection,
-    state: {
-      sorting,
-      columnFilters,
-      columnVisibility,
-      rowSelection,
-    },
-  })
-
-  if (loading) {
-    return <TableSkeleton columns={columns.length} />;
-  }
-
-  return (
-    <div className="w-full">
-      <div className="flex items-center py-4">
-        {/* Search is handled by the top navbar (q query param) */}
-      </div>
-      <div className="overflow-hidden rounded-md border">
-        <Table>
-          <TableHeader>
-            {table.getHeaderGroups().map((headerGroup) => (
-              <TableRow key={headerGroup.id}>
-                {headerGroup.headers.map((header) => {
-                  return (
-                    <TableHead key={header.id}>
-                      {header.isPlaceholder
-                        ? null
-                        : flexRender(
-                            header.column.columnDef.header,
-                            header.getContext()
-                          )}
-                    </TableHead>
-                  )
-                })}
-              </TableRow>
-            ))}
-          </TableHeader>
-          <TableBody>
-            {table.getRowModel().rows?.length ? (
-              table.getRowModel().rows.map((row) => (
-                <TableRow
-                  key={row.id}
-                  data-state={row.getIsSelected() && "selected"}
-                  className="cursor-pointer hover:bg-gray-50"
-                  onClick={(e) => {
-                    e.preventDefault();
-                    navigate(`/Order/${row.original.TrackingId}`);
-                  }}
-                >
-                  {row.getVisibleCells().map((cell) => (
-                    <TableCell key={cell.id}>
-                      {flexRender(
-                        cell.column.columnDef.cell,
-                        cell.getContext()
-                      )}
-                    </TableCell>
-                  ))}
-                </TableRow>
-              ))
-            ) : (
-              <TableRow>
-                <TableCell
-                  colSpan={columns.length}
-                  className="h-24 text-center"
-                >
-                  No orders found.
-                </TableCell>
-              </TableRow>
-            )}
-          </TableBody>
-        </Table>
-      </div>
-    </div>
-  )
-}
-
-/**
- * ShipperDataTable Component
- * 
- * Shipper data ကို sortable၊ filterable table တွင် search functionality ဖြင့် display လုပ်သည်။
- * Backend API မှ shipper data ကို fetch လုပ်ပြီး TanStack Table ကို အသုံးပြု၍ render လုပ်သည်။
- * 
- * Relationships:
- * - Shipper list ကို display လုပ်ရန် Shipper page component မှ အသုံးပြုသည်
- * - Backend မှ data fetch လုပ်ရန် getShippers() API function ကို call လုပ်သည်
- * - MongoDB fields များဖြင့် ShipperData ကို extend လုပ်သော Shipper type ကို အသုံးပြုသည်
- * - GET /api/shippers endpoint မှ data ကို render လုပ်သည်
- * - ShipperId ဖြင့် search functionality ကို provide လုပ်သည်
- * - Data fetch အတွင်း loading state ကို show လုပ်သည်
- * - Data array ဗလာဖြစ်သောအခါ "No shippers found" ကို display လုပ်သည်
- */
 export function ShipperDataTable() {
   const navigate = useNavigate()
   const [data, setData] = React.useState<Shipper[]>([]);

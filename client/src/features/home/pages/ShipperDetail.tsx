@@ -6,7 +6,7 @@ import { Link, useParams } from "react-router-dom"
 import { useEffect, useState } from "react"
 import { getOrders, getShipper, type OrderData, type ShipperData } from "@/api/serviceApi"
 import { CardTitle } from "@/components/ui/card"
-import { OrderDataTable } from "@/components/contentarea"
+import { OrderDataTable } from "@/components/DataTable"
 
 export function ShipperDetail() {
   const { shipperId } = useParams<{ shipperId: string }>()
@@ -67,7 +67,6 @@ export function ShipperDetail() {
         <div className="flex min-h-screen w-full">
           <AppSidebar />
           <SidebarInset className="flex flex-col w-full">
-            <TopNavbar />
             <div className="p-4">
               <div className="animate-pulse">
                 <div className="h-8 bg-gray-200 rounded w-1/4 mb-4"></div>
@@ -134,7 +133,6 @@ export function ShipperDetail() {
       <div className="flex min-h-screen w-full">
         <AppSidebar />
         <SidebarInset className="flex flex-col w-full">
-          <TopNavbar />
             {/* Back Button */}
             <div className="pl-2 pr-4 mt-3 flex justify-between items-center">
               <Link to="/Shipper">

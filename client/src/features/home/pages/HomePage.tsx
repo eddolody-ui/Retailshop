@@ -2,7 +2,7 @@ import { SidebarProvider, SidebarInset } from "@/components/ui/sidebar"
 import { AppSidebar } from "@/components/contentarea"
 import { TopNavbar } from "@/components/contentarea"
 import DashboardPage from "@/components/contentarea"
-import {OrderDataTable} from "@/components/contentarea"
+import {OrderDataTable} from "@/components/DataTable"
 
 export function HomePage() {
   return (

@@ -5,7 +5,6 @@ import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 import { useNavigate, useParams } from "react-router-dom";
 import { useState, useEffect } from "react";
 import { createOrder, getShippers, type ShipperData } from "@/api/serviceApi";
-import { toast } from "sonner";
 
 /**
  * CreateOrderForm Component
@@ -78,12 +77,10 @@ export function CreateOrderForm() {
       await createOrder({ ...formData, Status: formData.Status || "Pending" });
 
       // Show success toast
-      toast.success("Order created successfully!");
 
       navigate("/Shipper"); // Redirect after creation
     } catch (err: any) {
       setError(err?.response?.data?.message || "Error creating order");
-      toast.error(err?.response?.data?.message || "Failed to create order");
     } finally {
       setLoading(false);
     }
