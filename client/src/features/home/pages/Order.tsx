@@ -1,6 +1,6 @@
 import { SidebarProvider, SidebarInset } from "@/components/ui/sidebar"
 import { AppSidebar, TopNavbar } from "@/components/contentarea"
-import {OrderDataTable}  from "@/components/contentarea"
+import {OrderDataTable}  from "@/components/DataTable"
 
 export function Order() {
   return (

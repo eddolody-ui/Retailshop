@@ -1,3 +1,22 @@
+/**
+ * updateOrderStatus Function
+ * Relationships:
+ * - Called from OrderDetail page when status is changed
+ * - PATCH /api/orders/:trackingId/status endpoint
+ */
+export const updateOrderStatus = async ( // * Updates the status of an order and appends a log entry.
+  trackingId: string,
+  status: string,
+  message?: string,
+  createdBy?: string
+) => {
+  const res = await api.patch(`/orders/${trackingId}/status`, {
+    status,
+    message,
+    createdBy,
+  });
+  return res.data;
+};
 import api from "./axois";
 
 /**
@@ -22,6 +41,19 @@ export interface OrderData {
   Note: string;
   shipperId?: string | ShipperData;
   Status: string | 'Pending' | 'In Transit' | 'Delivered' | 'Cancelled';
+  log?: {
+    status: string;
+    timestamp: string;
+    message?: string;
+    createdBy?: string;
+  }[];
+}
+
+export interface OrderLog {
+  status: string
+  message?: string
+  createdAt: string
+  createdBy?: string
 }
 
 /**
@@ -72,19 +104,8 @@ export const getOrder = async (trackingId: string): Promise<OrderData & { _id: s
   const res = await api.get(`/orders/${trackingId}`);
   return res.data;
 };
+//..........................................................................................................//
 
-/**
- * OrderData Interface
- * 
- * Application တစ်လျှောက် အသုံးပြုသော order data ၏ structure ကို define လုပ်သည်။
- * ဤ interface သည် frontend forms နှင့် backend API ကြားတွင် type safety ကို ensure လုပ်သည်။
- * 
- * Relationships:
- * - createOrder function မှ input data ကို validate လုပ်ရန် အသုံးပြုသည်
- * - getOrders function မှ backend မှ return လုပ်သော data ဖြစ်သည်
- * - CreateOrderForm component မှ form state management အတွက် အသုံးပြုသည်
- * - Backend ရှိ MongoDB Order schema နှင့် match ဖြစ်သည်
- */
 export interface ShipperData {
   ShipperId: string;
   ShipperName: string;
@@ -95,50 +116,47 @@ export interface ShipperData {
   Note: string;
 }
 
-/**
- * createShipper Function
- * 
- * Shipper data ကို backend API သို့ send လုပ်ပြီး database တွင် အသစ်စက်စက် shipper ကို create လုပ်သည်။
- * 
- * Relationships:
- * - CreateShipper Form component ၏ handleSubmit မှ call လုပ်သည်
- * - Type validation အတွက် ShipperData interface ကို အသုံးပြုသည်
- * - /api/shippers endpoint သို့ POST request လုပ်သည်
- * - Confirmation အတွက် backend မှ created shipper data ကို return လုပ်သည်
- * - Backend server ၏ saveShipper function နှင့် connected ဖြစ်သည်
- */
 export const createShipper = async (shipperData: ShipperData) => {
   const res = await api.post("/shippers", shipperData);
   return res.data;
 };
 
-/**
- * getShipper Function
- * 
- * Specific shipper ကို ID ဖြင့် fetch လုပ်သည်။
- * 
- * Relationships:
- * - OrderDetail page တွင် shipper data ကို display လုပ်ရန် အသုံးပြုသည်
- * - /api/shippers/:id endpoint သို့ GET request လုပ်သည်
- * - Backend server ၏ Shipper.findById() နှင့် connected ဖြစ်သည်
- */
 export const getShipper = async (id: string): Promise<ShipperData & { _id: string }> => {
   const res = await api.get(`/shippers/${id}`);
   return res.data;
 };
 
-/**
- * getShippers Function
- * 
- * Shippers table တွင် display လုပ်ရန် backend API မှ shipper အားလုံးကို fetch လုပ်သည်။
- * 
- * Relationships:
- * - CreateOrder component မှ dropdown အတွက် shipper list ကို fetch လုပ်ရန် အသုံးပြုသည်
- * - /api/shippers endpoint သို့ GET request လုပ်သည်
- * - Backend server ၏ Shipper.find({}) နှင့် connected ဖြစ်သည်
- */
 export const getShippers = async (): Promise<(ShipperData & { _id: string })[]> => {
   const res = await api.get("/shippers");
   return res.data;
 };
 
+//..........................................................................................................//
+
+export interface RouteData {
+  RouteId: string;
+  Hub: string;
+  AssignPersonName: string;
+  DateCreated?: Date;
+}
+export const createRoute = async (routeData: RouteData) => {
+  const res = await api.post("/routes", routeData);
+  return res.data;
+}
+
+export const getRoutes = async (): Promise<RouteData[]> => {
+  const res = await api.get("/routes");
+  return res.data;
+};
+
+export const getRoute = async (id: string): Promise<RouteData & { _id: string }> => {
+  const res = await api.get(`/routes/${id}`);
+  return res.data;
+};
+
+export const generateRouteId = () => {
+  const random = Math.floor(100000 + Math.random() * 900000);
+  return `${random}`;
+};
+
+//..........................................................................................................//

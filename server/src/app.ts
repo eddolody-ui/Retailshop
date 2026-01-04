@@ -9,6 +9,7 @@ import { ENV_VARS } from "./config/envVars";
 // import routes from "./routes/v1";
 import orderRoutes from "./order.rout";
 import shipperRoutes from "./shipper.rout";
+import routeRoutes from "./route.rout";
 
 export const app = express();
 console.log(ENV_VARS.CLIENT_URL);
@@ -34,7 +35,7 @@ const corsOptions = {
 app
   .use(morgan("dev"))
   .use(urlencoded({ extended: true }))
-  .use(json())
+  .use(json({ verify: (req: any, _res, buf: Buffer) => { req.rawBody = buf.toString(); } }))
   .use(cookieParser())
   .use(cors(corsOptions))
   .use(helmet())
@@ -43,10 +44,11 @@ app
 // app.use(routes);
 app.use("/api/orders", orderRoutes);
 app.use("/api/shippers", shipperRoutes);
+app.use("/api/routes", routeRoutes);
 
 // Global error handler
 app.use((err: any, req: express.Request, res: express.Response, next: express.NextFunction) => {
-  console.error("Global error handler:", err);
+  console.error("Global error handler:", err, "rawBody:", (req as any).rawBody);
   res.status(500).json({ message: "Internal server error", error: err.message });
 });
 

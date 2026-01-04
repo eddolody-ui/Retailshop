@@ -5,9 +5,8 @@ import { ArrowLeft } from "lucide-react"
 import { Link, useParams } from "react-router-dom"
 import { useEffect, useState } from "react"
 import { getOrders, getShipper, type OrderData, type ShipperData } from "@/api/serviceApi"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
-import { OrderDataTable } from "@/components/contentarea"
+import { CardTitle } from "@/components/ui/card"
+import { OrderDataTable } from "@/components/DataTable"
 
 export function ShipperDetail() {
   const { shipperId } = useParams<{ shipperId: string }>()
@@ -68,7 +67,6 @@ export function ShipperDetail() {
         <div className="flex min-h-screen w-full">
           <AppSidebar />
           <SidebarInset className="flex flex-col w-full">
-            <TopNavbar />
             <div className="p-4">
               <div className="animate-pulse">
                 <div className="h-8 bg-gray-200 rounded w-1/4 mb-4"></div>
@@ -135,74 +133,33 @@ export function ShipperDetail() {
       <div className="flex min-h-screen w-full">
         <AppSidebar />
         <SidebarInset className="flex flex-col w-full">
-          <TopNavbar />
             {/* Back Button */}
-            <div className="p-2 mt-3">
+            <div className="pl-2 pr-4 mt-3 flex justify-between items-center">
               <Link to="/Shipper">
                 <Button variant="outline">
                   <ArrowLeft className="mr-2 h-4 w-4" />
                   Back to Shippers
                 </Button>
               </Link>
+              <Link to={`/Shipper/${shipperId}/CreateOrder`}>
+                <Button className="bg-blue-700">
+                  Create Order
+                </Button>
+              </Link>
             </div>
           <div className="p-3">
           <EachShipperData shipperId={shipperId} />
           </div>
-          <div className="p-4">
-            {/* Shipper Information */}
-            <Card className="mb-6">
-              <CardHeader>
-                <CardTitle className="flex items-center justify-between">
-                  <span>Shipper Details</span>
-                  <Badge variant="secondary">{shipper.ShipperId}</Badge>
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div>
-                    <h3 className="font-semibold text-lg mb-2">{shipper.ShipperName}</h3>
-                    <div className="space-y-2">
-                      <p><span className="font-medium">Contact:</span> {shipper.ShipperContact}</p>
-                      <p><span className="font-medium">Address:</span> {shipper.ShipperAddress}</p>
-                      <p><span className="font-medium">Pick Up Address:</span> {shipper.PickUpAddress}</p>
-                      <p><span className="font-medium">Billing Type:</span> {shipper.BillingType}</p>
-                    </div>
-                  </div>
-                  <div>
-                    <h4 className="font-semibold mb-2">Orders Summary</h4>
-                    <div className="space-y-2">
-                      <p><span className="font-medium">Total Orders:</span> {orders.length}</p>
-                      <p><span className="font-medium">Total Pending:</span> {orders.filter(o => o.Status === 'Pending').length}</p>
-                      <p><span className="font-medium">Success Count:</span> {orders.filter(o => o.Status === 'Delivered').length}</p>
-                      <p><span className="font-medium">In Transit:</span> {orders.filter(o => o.Status === 'In Transit').length}</p>
-                      <p><span className="font-medium">Cancelled:</span> {orders.filter(o => o.Status === 'Cancelled').length}</p>
-                    </div>
-                  </div>
-                </div>
-                {shipper.Note && (
-                  <div className="mt-4">
-                    <h4 className="font-semibold mb-2">Notes</h4>
-                    <p className="text-gray-600">{shipper.Note}</p>
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-
+          <div className="p-3">
             {/* Orders by this Shipper */}
-            <Card>
-              <CardHeader>
-                <CardTitle>Orders Created by {shipper.ShipperName}</CardTitle>
-              </CardHeader>
-              <CardContent>
+                <CardTitle>Orders by {shipper.ShipperName}</CardTitle>
                 {orders.length > 0 ? (
                   <OrderDataTable orders={orders} />
                 ) : (
-                  <div className="text-center py-8">
+                  <div className="text-center">
                     <p className="text-gray-500">No orders found for this shipper.</p>
                   </div>
                 )}
-              </CardContent>
-            </Card>
           </div>
         </SidebarInset>
       </div>
