@@ -13,6 +13,7 @@ app.use(express.static(path.join(__dirname, "../client/dist")));
 // app.get("/*", ...)
 // app.get("*", ...)
 
+// ✅ မှန်တဲ့ usage
 app.use(express.static(path.resolve(__dirname, "../client/dist")));
 
 app.use((req, res) => {
@@ -23,4 +24,5 @@ app.listen(PORT, async () => {
   await connectDB();
   console.log(`Server is running on PORT : ${PORT}`);
 });
+
 
