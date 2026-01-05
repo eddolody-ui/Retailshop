@@ -56,9 +56,6 @@ app.use((err: any, req: express.Request, res: express.Response, next: express.Ne
 // ===== Serve React build (SPA) =====
 const clientDistPath = path.join(__dirname, "../../client/dist");
 
-// React static files
-app.use(express.static(clientDistPath));
-
 // 404 handler - must be last
 app.use((req: express.Request, res: express.Response) => {
   res.status(404).json({ message: "Route not found" });
@@ -75,6 +72,7 @@ app.use((req, res) => {
 });
 
 // app.use(errorHandler);
+
 
 
 
