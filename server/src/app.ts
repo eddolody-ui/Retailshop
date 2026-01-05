@@ -10,6 +10,7 @@ import { ENV_VARS } from "./config/envVars";
 import orderRoutes from "./order.rout";
 import shipperRoutes from "./shipper.rout";
 import routeRoutes from "./route.rout";
+import * as path from "path"
 
 export const app = express();
 console.log(ENV_VARS.CLIENT_URL);
@@ -52,9 +53,23 @@ app.use((err: any, req: express.Request, res: express.Response, next: express.Ne
   res.status(500).json({ message: "Internal server error", error: err.message });
 });
 
+// ===== Serve React build (SPA) =====
+const clientDistPath = path.join(__dirname, "../../client/dist");
+
+// React static files
+app.use(express.static(clientDistPath));
+
+// SPA fallback (must be AFTER API routes, BEFORE 404)
+app.use((req, res) => {
+  res.sendFile(path.join(clientDistPath, "index.html"));
+});
 // 404 handler - must be last
 app.use((req: express.Request, res: express.Response) => {
   res.status(404).json({ message: "Route not found" });
 });
 
 // app.use(errorHandler);
+
+
+
+
