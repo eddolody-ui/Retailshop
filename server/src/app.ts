@@ -60,16 +60,16 @@ const clientDistPath = path.join(__dirname, "../../client/dist");
 app.use(express.static(clientDistPath));
 
 // SPA fallback (must be AFTER API routes, BEFORE 404)
-app.get("/*", (req, res) => {
+app.use((req, res) => {
   res.sendFile(path.join(clientDistPath, "index.html"));
 });
-
 // 404 handler - must be last
 app.use((req: express.Request, res: express.Response) => {
   res.status(404).json({ message: "Route not found" });
 });
 
 // app.use(errorHandler);
+
 
 
 
