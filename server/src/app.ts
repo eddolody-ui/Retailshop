@@ -73,7 +73,20 @@ app.use((req, res) => {
 });
 
 
+app.use(express.static(path.resolve(__dirname, "../client/dist")));
+
+app.use("/api/orders", orderRoutes);
+app.use("/api/shippers", shipperRoutes);
+app.use("/api/routes", routeRoutes);
+
+app.use((req, res) => {
+  res.sendFile(path.resolve(__dirname, "../client/dist", "index.html"));
+});
+
 // app.use(errorHandler);
+
+
+
 
 
 
