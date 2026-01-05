@@ -57,16 +57,9 @@ app.use("/api/orders", orderRoutes);
 app.use("/api/shippers", shipperRoutes);
 app.use("/api/routes", routeRoutes);
 
-// ===== Serve React build (SPA) =====
-const clientDistPath = path.resolve(__dirname, "../client/dist");
-
-// ✅ Serve static assets
-app.use(express.static(clientDistPath));
-
-// ✅ Catch-all route for React Router (must be last)
-app.use((req, res) => {
-  res.sendFile(path.join(clientDistPath, "index.html"));
-});
+app.get("/api/health", (_req, res) => {
+  res.json({ status: "ok" })
+})
 
 // ===== Global error handler (last) =====
 app.use(
