@@ -56,19 +56,25 @@ app.use((err: any, req: express.Request, res: express.Response, next: express.Ne
 // ===== Serve React build (SPA) =====
 const clientDistPath = path.join(__dirname, "../../client/dist");
 
-// React static files
-app.use(express.static(clientDistPath));
-
-// SPA fallback (must be AFTER API routes, BEFORE 404)
-app.use((req, res) => {
-  res.sendFile(path.join(clientDistPath, "index.html"));
-});
 // 404 handler - must be last
 app.use((req: express.Request, res: express.Response) => {
   res.status(404).json({ message: "Route not found" });
 });
 
+app.use(express.static(path.resolve(__dirname, "../client/dist")));
+
+app.use("/api/orders", orderRoutes);
+app.use("/api/shippers", shipperRoutes);
+app.use("/api/routes", routeRoutes);
+
+app.use((req, res) => {
+  res.sendFile(path.resolve(__dirname, "../client/dist", "index.html"));
+});
+
 // app.use(errorHandler);
+
+
+
 
 
 
