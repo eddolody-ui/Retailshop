@@ -10,6 +10,7 @@ import { ENV_VARS } from "./config/envVars";
 import orderRoutes from "./order.rout";
 import shipperRoutes from "./shipper.rout";
 import routeRoutes from "./route.rout";
+import * as path from "path"
 
 export const app = express();
 console.log(ENV_VARS.CLIENT_URL);
@@ -69,4 +70,5 @@ app.use((req: express.Request, res: express.Response) => {
 });
 
 // app.use(errorHandler);
+
 
