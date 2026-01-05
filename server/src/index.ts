@@ -10,6 +10,7 @@ const PORT = ENV_VARS.PORT || 5000;
 app.use(express.static(path.join(__dirname, "../client/dist"))); 
 // ✅ Catch-all route for React Router
 
+// ✅ မှန်တဲ့ usage
 app.use(express.static(path.resolve(__dirname, "../client/dist")));
  // ✅ API routes (example) 
  
@@ -21,4 +22,5 @@ app.listen(PORT, async () => {
   await connectDB();
   console.log(`Server is running on PORT : ${PORT}`);
 });
+
 
