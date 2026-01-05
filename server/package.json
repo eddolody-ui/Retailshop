@@ -9,7 +9,7 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "dev": "nodemon src/index.ts",
-    "build": "cd client && npm install && npm run build && tsc -p .",
+    "build": "cd client && npm install && npm run build && cd .. && tsc -p .",
     "start": "node dist/index.js"
   },
   "dependencies": {
@@ -38,6 +38,7 @@
     "typescript": "^5.9.3"
   }
 }
+
 
 
 
