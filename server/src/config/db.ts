@@ -1,7 +1,6 @@
 import mongoose from "mongoose";
 import { ENV_VARS } from "./envVars";
 import { create } from "node:domain";
-import { Route } from "react-router-dom";
 
 /* =======================
    MongoDB Connection
