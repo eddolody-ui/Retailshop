@@ -60,7 +60,7 @@ const clientDistPath = path.join(__dirname, "../../client/dist");
 app.use(express.static(clientDistPath));
 
 // SPA fallback (must be AFTER API routes, BEFORE 404)
-app.get("*", (req, res) => {
+app.get("/*", (req, res) => {
   res.sendFile(path.join(clientDistPath, "index.html"));
 });
 
@@ -70,5 +70,6 @@ app.use((req: express.Request, res: express.Response) => {
 });
 
 // app.use(errorHandler);
+
 
 
