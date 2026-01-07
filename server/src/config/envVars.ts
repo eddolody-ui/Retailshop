@@ -7,4 +7,5 @@ export const ENV_VARS = {
   NODE_ENV: process.env.NODE_ENV,
   ACEESS_JWT_SECRET: process.env.ACEESS_JWT_SECRET,
   REFRESH_JWT_SECRET: process.env.REFRESH_JWT_SECRET,
+
 };
