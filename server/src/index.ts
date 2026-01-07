@@ -2,8 +2,6 @@ import "dotenv/config";
 import { app } from "./app";
 import { connectDB } from "./config/db";
 import { ENV_VARS } from "./config/envVars";
-import path from "path";
-import express from "express";
  
 const PORT = ENV_VARS.PORT || 5000;
 
@@ -16,4 +14,10 @@ app.listen(PORT, async () => {
   console.log(`Server is running on PORT : ${PORT}`);
 });
 
+app.get("/api/hello", (req, res) => {
+  res.json({ message: "Hello from backend!" });
+});
 
+app.listen(ENV_VARS.PORT, () => {
+  console.log(`Server running on port ${ENV_VARS.PORT}`);
+});

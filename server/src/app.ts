@@ -4,7 +4,6 @@ import cors from "cors";
 import express, { json, urlencoded } from "express";
 import helmet from "helmet";
 import morgan from "morgan";
-import * as path from "path";
 
 import { ENV_VARS } from "./config/envVars";
 // import { errorHandler } from "./middlewares/errorHandler";
