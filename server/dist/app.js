@@ -50,7 +50,7 @@ const order_rout_1 = __importDefault(require("./order.rout"));
 const shipper_rout_1 = __importDefault(require("./shipper.rout"));
 exports.app = (0, express_1.default)();
 console.log(envVars_1.ENV_VARS.CLIENT_URL);
-const whiteList = [envVars_1.ENV_VARS.CLIENT_URL, "http://localhost:5173", "http://localhost:5174", "http://localhost:5175"];
+const whiteList = [envVars_1.ENV_VARS.CLIENT_URL, "http://localhost:5173", "http://localhost:5174", "http://localhost:5175", "https://retailshop-k8s1.onrender.com"];
 const corsOptions = {
     origin: function (origin, callback) {
         // allow requests with no origin (eg. mobile app and curl request(s) like postman third party software)
