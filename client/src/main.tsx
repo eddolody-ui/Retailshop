@@ -23,8 +23,8 @@
     {path:"/Order/:trackingId", element:<OrderDetail />},
     {path:"/Shipper/:shipperId", element:<ShipperDetail />},
     {path:"/Shipper/:shipperId/CreateOrder", element:<CreateOrderForm />},
-    {path:"/Routes", element:<RoutePage />},
-    {path:"/Routes/:routeId", element:<RouteDetail />},
+    {path:"/Route", element:<RoutePage />},
+    {path:"/Route/:routeId", element:<RouteDetail />},
   ])
   
   createRoot(document.getElementById("root")!).render(

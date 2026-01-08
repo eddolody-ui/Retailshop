@@ -84,11 +84,11 @@ function App() {
           <Route path="/Shipper/CreateShipper" element={<CreateShipper />} />
           <Route path="/Shipper/:shipperId" element={<ShipperDetail />} />
           <Route path="/Shipper/:shipperId/CreateOrder" element={<CreateOrderForm />}/>
-          <Route path="/Routes" element={<RoutePage />} />
-          <Route path="/Routes/:routeId" element={<RouteDetail />} />
+          <Route path="/Route" element={<RoutePage />} />
+          <Route path="/Route/:routeId" element={<RouteDetail />} />
         </Routes>
         <Toaster richColors /> 
-      </BrowserRouter>
+      </BrowserRouter>  
     </ErrorBoundary>
   );
 }
