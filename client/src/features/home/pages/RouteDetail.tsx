@@ -7,7 +7,6 @@ import { useEffect, useState } from "react"
 import { getRoute, type OrderData, type RouteData } from "@/api/serviceApi"
 import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue} from "@/components/ui/select"
 
-
 export function RouteDetail() {
   const { routeId } = useParams<{ routeId: string }>()
   const [route, setRoute] = useState<(RouteData & { _id: string }) | null>(null)
@@ -45,7 +44,7 @@ export function RouteDetail() {
       } catch (err: any) {
         console.error("Error fetching order:", err)
         if (err.response?.status === 404) {
-          setError("Order not found")
+          setError("Route not found")
         } else if (err.response?.status >= 500) {
           setError("Server error. Please try again later.")
         } else if (err.code === 'NETWORK_ERROR' || !err.response) {
