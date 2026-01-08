@@ -160,7 +160,7 @@ export { DeliRoute, saveDeliRoute };
 
 //section for shipment schema and model
 const ShipmentSchema = new mongoose.Schema({
-    RouteId: { type: String, required: true, unique: true },
+    RouteId: { type: String, required: true},
     Hub: { type: String, required: true },
     AssignPersonName: { type: String, required: true },
     TotalPercel: { type: Number, required: true },

@@ -24,7 +24,7 @@
     {path:"/Shipper/:shipperId", element:<ShipperDetail />},
     {path:"/Shipper/:shipperId/CreateOrder", element:<CreateOrderForm />},
     {path:"/Route", element:<RoutePage />},
-    {path:"/Route/:routeId", element:<RouteDetail />},
+    {path:"/Route/:RouteId", element:<RouteDetail />},
   ])
   
   createRoot(document.getElementById("root")!).render(

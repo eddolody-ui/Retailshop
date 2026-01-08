@@ -278,7 +278,7 @@ function TableSkeleton({ columns }: { columns: number }) {
  * - Data array ဗလာဖြစ်သောအခါ "No orders found" ကို display လုပ်သည်
  */
 
-export function RouteDataTable({ routes }: { routes?: DeliRoute[] } = {}) {
+export function RouteDataTable({ Routes }: { Routes?: DeliRoute[] } = {}) {
   // RouteDataTable
   // - API မှ `getOrders()` ကို call ပြီး orders ကိုယူသည်။
   // - တကယ်ရှိရင် `getShippers()` နဲ့ merge လုပ်၍ shipper info ကို order နှင့် ပေါင်းစပ်ပေးသည်။
@@ -288,16 +288,16 @@ export function RouteDataTable({ routes }: { routes?: DeliRoute[] } = {}) {
   const navigate = useNavigate()
   const [data, setData] = React.useState<DeliRoute[]>([]);
   const [allData, setAllData] = React.useState<DeliRoute[]>([]);
-  const [loading, setLoading] = React.useState(!routes);
+  const [loading, setLoading] = React.useState(!Routes);
   const [sorting, setSorting] = React.useState<SortingState>([])
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([])
   const [columnVisibility, setColumnVisibility] = React.useState<VisibilityState>({})
   const [rowSelection, setRowSelection] = React.useState({})
 
   React.useEffect(() => {
-    if (routes) {
-      setData(routes);
-      setAllData(routes);
+    if (Routes) {
+      setData(Routes);
+      setAllData(Routes);
       setLoading(false);
       return;
     }

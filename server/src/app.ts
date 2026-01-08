@@ -4,7 +4,6 @@ import cors from "cors";
 import express, { json, urlencoded } from "express";
 import helmet from "helmet";
 import morgan from "morgan";
-import * as path from "path";
 
 import { ENV_VARS } from "./config/envVars";
 // import { errorHandler } from "./middlewares/errorHandler";
@@ -37,6 +36,7 @@ app
           "http://localhost:5173",
           "http://localhost:5174",
           "http://localhost:5175",
+          "https://retailshop-k8s1.onrender.com",
         ];
         if (!origin) return callback(null, true);
         if (whiteList.includes(origin)) {
@@ -57,16 +57,9 @@ app.use("/api/orders", orderRoutes);
 app.use("/api/shippers", shipperRoutes);
 app.use("/api/routes", routeRoutes);
 
-// ===== Serve React build (SPA) =====
-const clientDistPath = path.resolve(__dirname, "../client/dist");
-
-// ✅ Serve static assets
-app.use(express.static(clientDistPath));
-
-// ✅ Catch-all route for React Router (must be last)
-app.use((req, res) => {
-  res.sendFile(path.join(clientDistPath, "index.html"));
-});
+app.get("/api/health", (_req, res) => {
+  res.json({ status: "ok" })
+})
 
 // ===== Global error handler (last) =====
 app.use(
