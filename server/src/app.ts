@@ -4,6 +4,7 @@ import cors from "cors";
 import express, { json, urlencoded } from "express";
 import helmet from "helmet";
 import morgan from "morgan";
+import * as path from "path";
 
 import { ENV_VARS } from "./config/envVars";
 // import { errorHandler } from "./middlewares/errorHandler";
@@ -36,7 +37,6 @@ app
           "http://localhost:5173",
           "http://localhost:5174",
           "http://localhost:5175",
-          "https://retailshop-k8s1.onrender.com",
         ];
         if (!origin) return callback(null, true);
         if (whiteList.includes(origin)) {
