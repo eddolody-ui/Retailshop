@@ -37,7 +37,7 @@ app
           "http://localhost:5173",
           "http://localhost:5174",
           "http://localhost:5175",
-          "https://retailshop-k8s1.onrender.com",
+          "https://retailshop-k8s1.onrender.com/api",
         ];
         if (!origin) return callback(null, true);
         if (whiteList.includes(origin)) {
