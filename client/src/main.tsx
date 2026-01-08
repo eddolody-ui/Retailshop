@@ -13,7 +13,6 @@
   import { RoutePage } from "./features/home/pages/Route.tsx";
   import { RouteDetail } from "./features/home/pages/RouteDetail.tsx";
 
-
   const router =createBrowserRouter ([
     {path: '/',element:<HomePage/>},
     {path:'/Order',element:<Order/>},

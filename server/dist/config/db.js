@@ -12,7 +12,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.saveShipment = exports.Shipment = exports.saveDeliRoute = exports.DeliRoute = exports.saveShipper = exports.Shipper = exports.saveOrder = exports.Order = exports.connectDB = void 0;
+exports.saveDeliRoute = exports.DeliRoute = exports.saveShipper = exports.Shipper = exports.saveOrder = exports.Order = exports.connectDB = void 0;
 const mongoose_1 = __importDefault(require("mongoose"));
 /* =======================
    MongoDB Connection
@@ -144,7 +144,7 @@ const saveShipper = (shipperData) => __awaiter(void 0, void 0, void 0, function*
 exports.saveShipper = saveShipper;
 //section for DeliRoute schema and model
 const RouteSchema = new mongoose_1.default.Schema({
-    RouteId: { type: String, required: true, unique: true },
+    RouteId: { type: String, required: true },
     Hub: { type: String, required: true },
     AssignPersonName: { type: String, required: true },
     DateCreated: { type: Date, default: Date.now },
@@ -162,24 +162,3 @@ const saveDeliRoute = (routeData) => __awaiter(void 0, void 0, void 0, function*
     }
 });
 exports.saveDeliRoute = saveDeliRoute;
-//section for shipment schema and model
-const ShipmentSchema = new mongoose_1.default.Schema({
-    RouteId: { type: String, required: true, unique: true },
-    Hub: { type: String, required: true },
-    AssignPersonName: { type: String, required: true },
-    TotalPercel: { type: Number, required: true },
-    DateCreated: { type: Date, default: Date.now },
-}, { timestamps: true });
-const Shipment = mongoose_1.default.models.Shipment || mongoose_1.default.model("Shipment", ShipmentSchema);
-exports.Shipment = Shipment;
-const saveShipment = (shipmentData) => __awaiter(void 0, void 0, void 0, function* () {
-    try {
-        const shipment = new Shipment(shipmentData);
-        return yield shipment.save();
-    }
-    catch (error) {
-        console.error("❌ Shipment save error:", error);
-        throw error;
-    }
-});
-exports.saveShipment = saveShipment;

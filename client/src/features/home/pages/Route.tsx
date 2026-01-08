@@ -14,7 +14,6 @@ import { Button } from "@/components/ui/button"
 import { createRoute, getRoutes, generateRouteId, type RouteData } from "@/api/serviceApi"
 import { useNavigate } from "react-router-dom"
 
-
 export function RoutePage() {
   const [showModal, setShowModal] = useState(false);
   const [newHub, setNewHub] = useState("");  
@@ -23,7 +22,7 @@ export function RoutePage() {
   const navigate = useNavigate();
   const [, setLoading] = useState(false);
   const [, setError] = useState<string | null>(null);
-  const [routeId, setRouteId] = useState("");
+  const [RouteId, setRouteId] = useState("");
   const [, setRoutes] = useState<RouteData[] | undefined>(undefined);
 
   const openStatusModal = () => {
@@ -42,7 +41,7 @@ const handleSubmit = async (e: React.FormEvent) => {
   setLoading(true);
     try {
     await createRoute({
-      RouteId: routeId || generateRouteId(),
+      RouteId: RouteId || generateRouteId(),
       Hub: newHub,
       AssignPersonName: newRider,
       DateCreated: new Date(),
@@ -105,7 +104,7 @@ const handleSubmit = async (e: React.FormEvent) => {
                                                   <h2 className="text-2xl font-bold mb-6 text-gray-900">Create Route</h2>
                                                   <div className="mb-3">
                                                     <label className="block text-sm font-medium text-gray-700 mb-1">Route ID</label>
-                                                    <div className="w-full rounded-md border px-3 py-2 bg-gray-50 text-sm font-medium text-gray-800">{routeId || "(will be generated)"}</div>
+                                                    <div className="w-full rounded-md border px-3 py-2 bg-gray-50 text-sm font-medium text-gray-800">{RouteId || "(will be generated)"}</div>
                                                   </div>
                                                   <div className="mb-6">
                                     <label htmlFor="status-Hub" className="block text-sm font-medium text-gray-700 mb-2">Select Hub</label>

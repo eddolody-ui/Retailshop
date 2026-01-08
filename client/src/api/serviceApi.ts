@@ -140,18 +140,18 @@ export interface RouteData {
   AssignPersonName: string;
   DateCreated?: Date;
 }
-export const createRoute = async (routeData: RouteData) => {
-  const res = await api.post("/routes", routeData);
+export const createRoute = async (RouteData: RouteData) => {
+  const res = await api.post("/Routes", RouteData);
   return res.data;
 }
 
 export const getRoutes = async (): Promise<RouteData[]> => {
-  const res = await api.get("/routes");
+  const res = await api.get("/Routes");
   return res.data;
 };
 
 export const getRoute = async (id: string): Promise<RouteData & { _id: string }> => {
-  const res = await api.get(`/routes/${id}`);
+  const res = await api.get(`/Routes/${id}`);
   return res.data;
 };
 

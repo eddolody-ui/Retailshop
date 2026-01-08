@@ -53,7 +53,7 @@ router.get("/:id", (req, res) => __awaiter(void 0, void 0, void 0, function* () 
             route = yield db_1.DeliRoute.findById(id);
         }
         if (!route) {
-            route = yield db_1.DeliRoute.findOne({ routeId: id });
+            route = yield db_1.DeliRoute.findOne({ RouteId: id });
         }
         if (!route)
             return res.status(404).json({ message: "Route not found" });
