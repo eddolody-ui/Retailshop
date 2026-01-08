@@ -1,4 +1,3 @@
-
 import { SidebarProvider, SidebarInset } from "@/components/ui/sidebar"
 import { AppSidebar } from "@/components/contentarea"
 import { Button } from "@/components/ui/button"
@@ -10,7 +9,7 @@ import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue} from "@/c
 
 
 export function RouteDetail() {
-  const { RouteId } = useParams<{ RouteId: string }>()
+  const { routeId } = useParams<{ routeId: string }>()
   const [route, setRoute] = useState<(RouteData & { _id: string }) | null>(null)
   const [order] = useState<(OrderData & { _id: string; createdAt: string; updatedAt: string }) | null>(null)
   const [loading, setLoading] = useState(true)
@@ -25,12 +24,13 @@ export function RouteDetail() {
 
   // Update newStatus when modal opens
   const openStatusModal = () => {
+    setNewStatus(order?.Status || "");
     setShowModal(true);
   };
 
   useEffect(() => {
     const fetchRoute = async () => {
-      if (!RouteId) {
+      if (!routeId) {
         setError("No Route ID provided")
         setLoading(false)
         return
@@ -38,20 +38,20 @@ export function RouteDetail() {
 
       try {
         // Fetch route by RouteId (RouteId may be custom string or Mongo _id)
-        const routeData = await getRoute(RouteId)
+        const routeData = await getRoute(routeId)
         setRoute(routeData)
 
         // Handle shipper data - either populated object or string reference
       } catch (err: any) {
         console.error("Error fetching order:", err)
         if (err.response?.status === 404) {
-          setError("Route not found")
+          setError("Order not found")
         } else if (err.response?.status >= 500) {
           setError("Server error. Please try again later.")
         } else if (err.code === 'NETWORK_ERROR' || !err.response) {
           setError("Network error. Please check your connection.")
         } else {
-          setError("Failed to load route details")
+          setError("Failed to load order details")
         }
       } finally {
         setLoading(false)
@@ -59,7 +59,7 @@ export function RouteDetail() {
     }
 
     fetchRoute()
-  }, [RouteId])
+  }, [routeId])
 
   if (loading) {
     return (
