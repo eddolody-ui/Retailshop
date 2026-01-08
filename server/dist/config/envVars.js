@@ -4,7 +4,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.ENV_VARS = void 0;
 exports.ENV_VARS = {
     PORT: process.env.PORT || 5000,
-    CLIENT_URL: process.env.CLIENT_URL || "http://localhost:5173",
+    CLIENT_URL: process.env.CLIENT_URL || "https://retailshop-k8s1.onrender.com",
     MONGO_URI: process.env.MONGO_URI,
     NODE_ENV: process.env.NODE_ENV,
     ACEESS_JWT_SECRET: process.env.ACEESS_JWT_SECRET,

@@ -14,6 +14,9 @@ const app_1 = require("./app");
 const db_1 = require("./config/db");
 const envVars_1 = require("./config/envVars");
 const PORT = envVars_1.ENV_VARS.PORT || 5000;
+app_1.app.get("/api/health", (_req, res) => {
+    res.json({ status: "ok" });
+});
 app_1.app.listen(PORT, () => __awaiter(void 0, void 0, void 0, function* () {
     yield (0, db_1.connectDB)();
     console.log(`Server is running on PORT : ${PORT}`);

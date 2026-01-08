@@ -12,7 +12,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.saveShipper = exports.Shipper = exports.saveOrder = exports.Order = exports.connectDB = void 0;
+exports.saveShipment = exports.Shipment = exports.saveDeliRoute = exports.DeliRoute = exports.saveShipper = exports.Shipper = exports.saveOrder = exports.Order = exports.connectDB = void 0;
 const mongoose_1 = __importDefault(require("mongoose"));
 /* =======================
    MongoDB Connection
@@ -53,10 +53,19 @@ const OrderSchema = new mongoose_1.default.Schema({
     Amount: { type: Number, required: true },
     Type: { type: String, required: true },
     Note: { type: String },
-    shipperId: { type: mongoose_1.default.Schema.Types.ObjectId, ref: 'Shipper' },
+    shipperId: { type: mongoose_1.default.Schema.Types.Mixed, ref: 'Shipper', required: false },
     Status: { type: String,
         enum: ["Pending", "Hub Inbound", "Arrive At Softing Hub", "In Route", "Delivered", "Return To Sender", "Cancelled"],
         default: "Pending" },
+    log: [
+        {
+            status: { type: String },
+            timestamp: { type: Date, default: Date.now },
+            createdAt: { type: Date, default: Date.now },
+            createdBy: { type: String },
+            message: { type: String }
+        }
+    ]
 }, { timestamps: true });
 /* =======================
    Order Model (Safe)
@@ -92,6 +101,15 @@ exports.Order = Order;
  */
 const saveOrder = (orderData) => __awaiter(void 0, void 0, void 0, function* () {
     try {
+        // Add initial log entry for order creation
+        if (!orderData.log)
+            orderData.log = [];
+        orderData.log.push({
+            status: orderData.Status || "Pending",
+            message: "Order created",
+            timestamp: new Date(),
+            createdBy: orderData.createdBy || "system"
+        });
         const order = new Order(orderData);
         return yield order.save();
     }
@@ -101,6 +119,7 @@ const saveOrder = (orderData) => __awaiter(void 0, void 0, void 0, function* () 
     }
 });
 exports.saveOrder = saveOrder;
+//section for Shipper schema and model
 const ShipperSchema = new mongoose_1.default.Schema({
     ShipperId: { type: String, required: true },
     ShipperName: { type: String, required: true },
@@ -123,3 +142,44 @@ const saveShipper = (shipperData) => __awaiter(void 0, void 0, void 0, function*
     }
 });
 exports.saveShipper = saveShipper;
+//section for DeliRoute schema and model
+const RouteSchema = new mongoose_1.default.Schema({
+    routeId: { type: String, required: true, unique: true },
+    Hub: { type: String, required: true },
+    AssignPersonName: { type: String, required: true },
+    DateCreated: { type: Date, default: Date.now },
+}, { timestamps: true });
+const DeliRoute = mongoose_1.default.models.DeliRoute || mongoose_1.default.model("DeliRoute", RouteSchema);
+exports.DeliRoute = DeliRoute;
+const saveDeliRoute = (routeData) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const route = new DeliRoute(routeData);
+        return yield route.save();
+    }
+    catch (error) {
+        console.error("❌ Route save error:", error);
+        throw error;
+    }
+});
+exports.saveDeliRoute = saveDeliRoute;
+//section for shipment schema and model
+const ShipmentSchema = new mongoose_1.default.Schema({
+    RouteId: { type: String, required: true, unique: true },
+    Hub: { type: String, required: true },
+    AssignPersonName: { type: String, required: true },
+    TotalPercel: { type: Number, required: true },
+    DateCreated: { type: Date, default: Date.now },
+}, { timestamps: true });
+const Shipment = mongoose_1.default.models.Shipment || mongoose_1.default.model("Shipment", ShipmentSchema);
+exports.Shipment = Shipment;
+const saveShipment = (shipmentData) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const shipment = new Shipment(shipmentData);
+        return yield shipment.save();
+    }
+    catch (error) {
+        console.error("❌ Shipment save error:", error);
+        throw error;
+    }
+});
+exports.saveShipment = saveShipment;

@@ -112,4 +112,15 @@ router.get("/:id", (req, res) => __awaiter(void 0, void 0, void 0, function* () 
         res.status(500).json({ message: "Failed to fetch shipper", error });
     }
 }));
+// GET /api/orders/pending/count
+router.get("/orders/pending/count", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const pendingCount = yield db_1.Order.countDocuments({ Status: "Pending" });
+        res.json({ pendingCount });
+    }
+    catch (error) {
+        console.error("Error fetching pending orders count:", error);
+        res.status(500).json({ message: "Server error" });
+    }
+}));
 exports.default = router;
