@@ -11,8 +11,39 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = require("express");
 const db_1 = require("./config/db");
-const db_2 = require("./config/db");
+/**
+ * PATCH /:trackingId/status - Update Order Status and Log
+ *
+ * Updates the status of an order and appends a log entry.
+ *
+ * Relationships:
+ * - Called from frontend when status is changed
+ * - Updates order status and pushes log entry
+ */
 const router = (0, express_1.Router)();
+router.patch('/:trackingId/status', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const { status, message, createdBy } = req.body;
+        const order = yield db_1.Order.findOne({ TrackingId: req.params.trackingId });
+        if (!order) {
+            return res.status(404).json({ message: 'Order not found' });
+        }
+        order.Status = status;
+        order.log = order.log || [];
+        order.log.push({
+            status,
+            message: message || `Status changed to ${status}`,
+            timestamp: new Date(),
+            createdBy: createdBy || 'system',
+        });
+        yield order.save();
+        res.json(order);
+    }
+    catch (error) {
+        console.error('Order status update error:', error);
+        res.status(500).json({ message: 'Failed to update status', error });
+    }
+}));
 /**
  * POST / - Create Order Route
  *
@@ -27,11 +58,22 @@ const router = (0, express_1.Router)();
  */
 router.post("/", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
+        console.log("POST /api/orders body:", req.body);
+        // Accept both ObjectId and string for shipperId
+        // If shipperId is a valid ObjectId, convert it, else leave as string
+        if (req.body.shipperId) {
+            const mongoose = require('mongoose');
+            if (mongoose.Types.ObjectId.isValid(req.body.shipperId)) {
+                req.body.shipperId = new mongoose.Types.ObjectId(req.body.shipperId);
+            } // else: leave as string for custom ShipperId
+        }
         const savedOrder = yield (0, db_1.saveOrder)(req.body);
         res.status(201).json(savedOrder);
     }
     catch (error) {
-        res.status(400).json({ message: "Order save failed", error });
+        console.error("Order save error details:", error);
+        const errMsg = (error === null || error === void 0 ? void 0 : error.message) || (typeof error === 'string' ? error : JSON.stringify(error));
+        res.status(400).json({ message: "Order save failed", error: errMsg });
     }
 }));
 /**
@@ -48,7 +90,7 @@ router.post("/", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
  */
 router.get("/", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const orders = yield db_2.Order.find({}).populate('shipperId');
+        const orders = yield db_1.Order.find({}); // Remove .populate('shipperId')
         res.json(orders);
     }
     catch (error) {
@@ -68,9 +110,9 @@ router.get("/", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
  */
 router.get("/:trackingId", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const order = yield db_2.Order.findOne({
+        const order = yield db_1.Order.findOne({
             TrackingId: req.params.trackingId,
-        }).populate('shipperId');
+        }); // Remove .populate('shipperId')
         if (!order) {
             return res.status(404).json({ message: "Order not found" });
         }
