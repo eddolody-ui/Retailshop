@@ -9,6 +9,7 @@ import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue} from "@/c
 
 export function RouteDetail() {
   const { routeId } = useParams<{ routeId: string }>()
+  console.log("RouteDetail routeId:", routeId)
   const [route, setRoute] = useState<(RouteData & { _id: string }) | null>(null)
   const [order] = useState<(OrderData & { _id: string; createdAt: string; updatedAt: string }) | null>(null)
   const [loading, setLoading] = useState(true)
