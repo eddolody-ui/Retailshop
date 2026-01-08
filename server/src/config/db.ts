@@ -159,26 +159,5 @@ const saveDeliRoute = async (routeData: any) => {
 
 export { DeliRoute, saveDeliRoute };
 
-//section for shipment schema and model
-const ShipmentSchema = new mongoose.Schema({
-    RouteId: { type: String, required: true, unique: true },
-    Hub: { type: String, required: true },
-    AssignPersonName: { type: String, required: true },
-    TotalPercel: { type: Number, required: true },
-    DateCreated: { type: Date, default: Date.now },
-  }, { timestamps: true });
 
-const Shipment = mongoose.models.Shipment || mongoose.model("Shipment", ShipmentSchema);
-
-const saveShipment = async (shipmentData: any) => {
-  try {
-    const shipment = new Shipment(shipmentData); 
-    return await shipment.save();
-  } catch (error) {
-    console.error("❌ Shipment save error:", error);
-    throw error;
-  } 
-};
-
-export { Shipment, saveShipment };
 
