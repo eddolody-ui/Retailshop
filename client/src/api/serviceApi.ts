@@ -1,4 +1,3 @@
-
 /**
  * updateOrderStatus Function
  * Relationships:
@@ -140,18 +139,18 @@ export interface RouteData {
   AssignPersonName: string;
   DateCreated?: Date;
 }
-export const createRoute = async (RouteData: RouteData) => {
-  const res = await api.post("/Routes", RouteData);
+export const createRoute = async (routeData: RouteData) => {
+  const res = await api.post("/routes", routeData);
   return res.data;
 }
 
 export const getRoutes = async (): Promise<RouteData[]> => {
-  const res = await api.get("/Routes");
+  const res = await api.get("/routes");
   return res.data;
 };
 
 export const getRoute = async (id: string): Promise<RouteData & { _id: string }> => {
-  const res = await api.get(`/Routes/${id}`);
+  const res = await api.get(`/routes/${id}`);
   return res.data;
 };
 
