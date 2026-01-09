@@ -32,13 +32,12 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table"
-import { getOrders, getRoutes, getShippers, type OrderData, type RouteData, type ShipperData } from "@/api/serviceApi"
+import { getOrders, getShippers, type OrderData, type ShipperData } from "@/api/serviceApi"
 import { Skeleton } from "@/components/ui/skeleton"
 import { useNavigate, useSearchParams } from "react-router-dom"
 
 export type Order = OrderData & { _id: string; createdAt: string; updatedAt: string };
 export type Shipper = ShipperData & { _id: string; createdAt: string; updatedAt: string };
-export type DeliRoute = RouteData & { RouteId: string; AssignPersonName: string; TotalPercel: number; _id: string; createdAt: string; updatedAt: string };
 
 export const shipperColumns: ColumnDef<Shipper>[] = [
   // `shipperColumns` ဆိုတာ Shipper table အတွက် column definitions ဖြစ်တယ်။
@@ -162,74 +161,6 @@ export const columns: ColumnDef<Order>[] = [
   },
 ]
 
-export const RouteColumns: ColumnDef<DeliRoute>[] = [
-  {
-    accessorKey: "RouteId",
-    header: () => <div className="flex justify-center">Route ID</div>,
-    cell: ({ row }) => {
-      return <div className="capitalize flex justify-center">{row.getValue("RouteId")}</div>
-    },
-  },
-  {
-    accessorKey: "AssignPersonName",
-    header: () => <div className="flex justify-center">Assign Person</div>,
-    cell: ({ row }) => {
-      return <div className="capitalize flex justify-center">{row.getValue("AssignPersonName")}</div>
-    },
-  },
-  {
-    accessorKey: "Process",
-    header: () => <div className="flex justify-center">Process</div>,
-    cell: ({ row }) => {
-      return <div className="capitalize flex justify-center">{row.getValue("Process")}</div>
-    },
-  },
-  {
-    accessorKey: "TotalPercel",
-    header: () => <div className="flex justify-center">Total Parcel</div>,
-    cell: ({ row }) => {
-      // Try to read success/fail counts if available on the route object
-      const total = Number(row.getValue("TotalPercel") || 0)
-      const orig: any = row.original as any
-      const success = Number(orig.SuccessfulPercel ?? orig.success ?? orig.Success ?? total)
-      const fail = Number(orig.FailedPercel ?? orig.fail ?? orig.Failed ?? Math.max(0, total - success))
-
-      const safeTotal = Math.max(0, total || success + fail)
-
-      const pctSuccess = safeTotal > 0 ? Math.round((success / safeTotal) * 100) : 0
-      const pctFail = safeTotal > 0 ? Math.round((fail / safeTotal) * 100) : 0
-
-      return (
-        <div className="flex flex-col items-center">
-          <div className="w-40 h-4 bg-gray-200 rounded overflow-hidden flex">
-            <div
-              className="h-full bg-emerald-500"
-              style={{ width: `${pctSuccess}%` }}
-              title={`Success: ${success}`}
-            />
-            <div
-              className="h-full bg-rose-500"
-              style={{ width: `${pctFail}%` }}
-              title={`Fail: ${fail}`}
-            />
-          </div>
-          <div className="text-xs text-gray-600 mt-1">{success} / {safeTotal} ({pctSuccess}% success)</div>
-        </div>
-      )
-    },
-  },
-  {
-    accessorKey: "createdAt",
-    header: () => <div className="flex justify-center">Date Created</div>,
-    cell: ({ row }) => {
-      const date = new Date(row.getValue("createdAt")).toLocaleDateString();
-      return <div className="capitalize flex justify-center">{date}</div>
-    },
-  },
-
-]
-
-
 
 function TableSkeleton({ columns }: { columns: number }) {
   // TableSkeleton: loading state အတွင်းမှာ ဗလာ placeholder rows/header များကို ပြရန် component
@@ -278,158 +209,6 @@ function TableSkeleton({ columns }: { columns: number }) {
  * - Data array ဗလာဖြစ်သောအခါ "No orders found" ကို display လုပ်သည်
  */
 
-export function RouteDataTable({ Routes }: { Routes?: DeliRoute[] } = {}) {
-  // RouteDataTable
-  // - API မှ `getOrders()` ကို call ပြီး orders ကိုယူသည်။
-  // - တကယ်ရှိရင် `getShippers()` နဲ့ merge လုပ်၍ shipper info ကို order နှင့် ပေါင်းစပ်ပေးသည်။
-  // - URL query param `q` (search) ကို `useSearchParams` ကနေ ဖတ်ပြီး client-side filter လုပ်ပေးတယ်။
-  // - `useReactTable` ကိုသုံးပြီး sorting/filtering/pagination စတာတွေကို ထိန်းချုပ်ပေးတယ်။
-  // - row click မှာ `useNavigate` နဲ့ order detail page သို့ ပြောင်းပေးတယ်။
-  const navigate = useNavigate()
-  const [data, setData] = React.useState<DeliRoute[]>([]);
-  const [allData, setAllData] = React.useState<DeliRoute[]>([]);
-  const [loading, setLoading] = React.useState(!Routes);
-  const [sorting, setSorting] = React.useState<SortingState>([])
-  const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([])
-  const [columnVisibility, setColumnVisibility] = React.useState<VisibilityState>({})
-  const [rowSelection, setRowSelection] = React.useState({})
-
-  React.useEffect(() => {
-    if (Routes) {
-      setData(Routes);
-      setAllData(Routes);
-      setLoading(false);
-      return;
-    }
-
-    const fetchRoute = async () => {
-      try {
-        const fetched = await getRoutes();
-        const routesArr = (fetched || []) as DeliRoute[];
-
-        // No complex merge needed for routes currently; use fetched array directly
-        setData(routesArr);
-        setAllData(routesArr);
-      } catch (error) {
-        console.error("Failed to fetch Route:", error);
-        setData([]);
-        setAllData([]);
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchRoute();
-  }, []);
-
-  const [searchParams] = useSearchParams();
-  React.useEffect(() => {
-    const q = (searchParams.get('q') || '').trim().toLowerCase()
-    if (!q) {
-      setData(allData)
-      return
-    }
-
-    const filtered = allData.filter((o) => {
-      const tracking = (o.RouteId || '').toString().toLowerCase()
-      const orderId = (o._id || '').toString().toLowerCase()
-      const AssignPersonName = (o.AssignPersonName || '').toString().toLowerCase()
-      const identifier = (((o as any).routeIdentifier) || (o.RouteId) || (o._id) || '').toString().toLowerCase()
-
-      return (
-        tracking.includes(q) ||
-        orderId.includes(q) ||
-        AssignPersonName.includes(q) ||
-        identifier.includes(q)
-      )
-    })
-
-    setData(filtered)
-  }, [searchParams, allData])
-
-  const table = useReactTable({
-    data,
-    columns: RouteColumns,
-    onSortingChange: setSorting,
-    onColumnFiltersChange: setColumnFilters,
-    getCoreRowModel: getCoreRowModel(),
-    getPaginationRowModel: getPaginationRowModel(),
-    getSortedRowModel: getSortedRowModel(),
-    getFilteredRowModel: getFilteredRowModel(),
-    onColumnVisibilityChange: setColumnVisibility,
-    onRowSelectionChange: setRowSelection,
-    state: {
-      sorting,
-      columnFilters,
-      columnVisibility,
-      rowSelection,
-    },
-  })    
-
-  if (loading) {
-    return <TableSkeleton columns={RouteColumns.length} />;
-  }
-
-  return (
-    <div className="w-full">
-      <div className="flex items-center py-4"></div>
-      <div className="overflow-hidden rounded-md border">
-        <Table>
-          <TableHeader>
-            {table.getHeaderGroups().map((headerGroup) => (
-              <TableRow key={headerGroup.id}>
-                {headerGroup.headers.map((header) => {
-                  return (
-                    <TableHead key={header.id}>
-                      {header.isPlaceholder
-                        ? null
-                        : flexRender(
-                            header.column.columnDef.header,
-                            header.getContext()
-                          )}
-                    </TableHead>
-                  )
-                })}
-              </TableRow>
-            ))}
-          </TableHeader>
-          <TableBody>
-            {table.getRowModel().rows?.length ? (
-              table.getRowModel().rows.map((row) => (
-                <TableRow
-                  key={row.id}
-                  data-state={row.getIsSelected() && "selected"}
-                  className="cursor-pointer hover:bg-gray-50"
-                  onClick={(e) => {
-                    e.preventDefault();
-                    navigate(`/Route/${row.original.RouteId}`);
-                  }}
-                >
-                  {row.getVisibleCells().map((cell) => (
-                    <TableCell key={cell.id}>
-                      {flexRender(
-                        cell.column.columnDef.cell,
-                        cell.getContext()
-                      )}
-                    </TableCell>
-                  ))}
-                </TableRow>
-              ))
-            ) : (
-              <TableRow>
-                <TableCell
-                  colSpan={RouteColumns.length}
-                  className="h-24 text-center"
-                >
-                  No route found.
-                </TableCell>
-              </TableRow>
-            )}
-          </TableBody>
-        </Table>
-      </div>
-    </div>
-  )
-}
 /**
  * ShipperDataTable Component
  * 

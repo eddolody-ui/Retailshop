@@ -10,7 +10,7 @@ import { RouteDetail} from "./features/home/pages/RouteDetail";
 import { Component } from "react";
 import type { ErrorInfo, ReactNode } from "react";
 import { Toaster } from "sonner";
-import { RoutePage } from "./features/home/pages/Route";
+import { Route } from "./features/home/pages/Route";
 
 class ErrorBoundary extends Component<{children: ReactNode}, {hasError: boolean, error?: Error}> {
   constructor(props: {children: ReactNode}) {
@@ -84,7 +84,7 @@ function App() {
           <Route path="/Shipper/CreateShipper" element={<CreateShipper />} />
           <Route path="/Shipper/:shipperId" element={<ShipperDetail />} />
           <Route path="/Shipper/:shipperId/CreateOrder" element={<CreateOrderForm />}/>
-          <Route path="/Route" element={<RoutePage />} />
+          <Route path="/Route" element={<Route />} />
           <Route path="/Route/:routeId" element={<RouteDetail />} />
         </Routes>
         <Toaster richColors /> 

@@ -133,31 +133,3 @@ export const getShippers = async (): Promise<(ShipperData & { _id: string })[]> 
 };
 
 //..........................................................................................................//
-
-export interface RouteData {
-  RouteId: string;
-  Hub: string;
-  AssignPersonName: string;
-  DateCreated?: Date;
-}
-export const createRoute = async (RouteData: RouteData) => {
-  const res = await api.post("/Routes", RouteData);
-  return res.data;
-}
-
-export const getRoutes = async (): Promise<RouteData[]> => {
-  const res = await api.get("/Routes");
-  return res.data;
-};
-
-export const getRoute = async (id: string): Promise<RouteData & { _id: string }> => {
-  const res = await api.get(`/Routes/${id}`);
-  return res.data;
-};
-
-export const generateRouteId = () => {
-  const random = Math.floor(100000 + Math.random() * 900000);
-  return `${random}`;
-};
-
-//..........................................................................................................//
