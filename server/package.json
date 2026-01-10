@@ -23,7 +23,9 @@
     "helmet": "^8.1.0",
     "jsonwebtoken": "^9.0.3",
     "mongoose": "^9.0.1",
-    "morgan": "^1.10.1"
+    "morgan": "^1.10.1",
+    "nodemon": "^3.1.11",
+    "vite": "^6.4.1"
   },
   "devDependencies": {
     "@types/bcrypt": "^6.0.0",
@@ -38,7 +40,3 @@
     "typescript": "^5.9.3"
   }
 }
-
-
-
-
