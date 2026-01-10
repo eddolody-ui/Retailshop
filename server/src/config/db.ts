@@ -22,18 +22,6 @@ export const connectDB = async () => {
 /* =======================
    Order Schema
 ======================= */
-/**
- * Order Schema Definition
- * 
- * Order documents အတွက် MongoDB schema ကို define လုပ်သည်။
- * Structured data model ကို create လုပ်ရန် Mongoose ကို အသုံးပြုသည်။
- * 
- * Relationships:
- * - Client serviceApi.ts ၏ OrderData interface နှင့် fields များ match ဖြစ်သည်
- * - Database operations အတွက် Order model မှ အသုံးပြုသည်
- * - Timestamps သည် createdAt နှင့် updatedAt fields များကို automatically ထည့်သည်
- * - MongoDB ၏ Order collection နှင့် connected ဖြစ်သည်
- */
 const OrderSchema = new mongoose.Schema(
   {
     TrackingId: { type: String, required: true },
@@ -43,7 +31,7 @@ const OrderSchema = new mongoose.Schema(
     Amount: { type: Number, required: true },
     Type: { type: String, required: true },
     Note: { type: String },
-    shipperId: { type: mongoose.Schema.Types.Mixed, ref: 'Shipper', required: false },
+    shipperId: { type: mongoose.Schema.Types.ObjectId, ref: 'Shipper', required: false },
     Status: { type: String, 
               enum: ["Pending", "Hub Inbound", "Arrive At Softing Hub", "In Route", "Delivered", "Return To Sender", "Cancelled"],
               default: "Pending" },
@@ -60,41 +48,10 @@ const OrderSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-/* =======================
-   Order Model (Safe)
-======================= */
-/**
- * Order Model
- * 
- * Order collection အတွက် Mongoose model။ Model re-compilation errors ကို prevent လုပ်ရန်
- * singleton pattern ကို အသုံးပြုသည်။
- * 
- * Relationships:
- * - OrderSchema definition မှ created ဖြစ်သည်
- * - New documents ကို create လုပ်ရန် saveOrder function မှ အသုံးပြုသည်
- * - Router.get("/") မှ all orders ကို fetch လုပ်ရန် queried ဖြစ်သည်
- * - Router.get("/:trackingId") မှ individual orders ကို fetch လုပ်ရန် queried ဖြစ်သည်
- */
-
 const Order = mongoose.models.Order || mongoose.model("Order", OrderSchema);
-/* =======================
-   Save Order
-======================= */
-/**
- * saveOrder Function
- * 
- * New order document ကို MongoDB သို့ create လုပ်ပြီး save လုပ်သည်။
- * 
- * Relationships:
- * - Router.post("/") route handler မှ call လုပ်သည်
- * - Client createOrder API call မှ orderData ကို receive လုပ်သည်
- * - Order model ကို အသုံးပြု၍ new Order document ကို create လုပ်သည်
- * - Route handler သို့ saved document ကို return လုပ်သည်
- * - Client Order table တွင် display လုပ်ရန် data ကို eventually ပို့သည်
- */
+
 const saveOrder = async (orderData: any) => {
   try {
-    // Add initial log entry for order creation
     if (!orderData.log) orderData.log = [];
     orderData.log.push({
       status: orderData.Status || "Pending",
@@ -134,3 +91,24 @@ const saveShipper = async (shipperData: any) => {
   } 
 };
 export { Shipper, saveShipper };
+
+// Section for Route schema and model
+const RouteSchema = new mongoose.Schema({
+    routeName: { type: String, required: true },
+    driverName: { type: String, required: true },
+    orders: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Order' }]
+}, { timestamps: true });
+
+const Route = mongoose.models.Route || mongoose.model("Route", RouteSchema);
+
+const saveRoute = async (routeData: any) => {
+    try {
+        const route = new Route(routeData);
+        return await route.save();
+    } catch (error) {
+        console.error("❌ Route save error:", error);
+        throw error;
+    }
+};
+
+export { Route, saveRoute };

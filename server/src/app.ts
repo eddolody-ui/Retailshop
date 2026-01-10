@@ -9,6 +9,7 @@ import { ENV_VARS } from "./config/envVars";
 // import { errorHandler } from "./middlewares/errorHandler";
 import orderRoutes from "./order.rout";
 import shipperRoutes from "./shipper.rout";
+import routeRoutes from "./route.rout";
 
 export const app = express();
 
@@ -54,6 +55,7 @@ app
 // ===== API routes =====
 app.use("/api/orders", orderRoutes);
 app.use("/api/shippers", shipperRoutes);
+app.use("/api/routes", routeRoutes);
 
 app.get("/api/health", (_req, res) => {
   res.json({ status: "ok" })
